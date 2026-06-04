@@ -1,0 +1,19 @@
+name: Dev Deploy
+
+on:
+  push:
+    branches:
+      - dev
+
+concurrency:
+  group: dev-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-push:
+    uses: ./.github/workflows/build-and-push.yaml
+    with:
+      ENVIRONMENT_NAME: dev
+    secrets:
+      VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+      VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
