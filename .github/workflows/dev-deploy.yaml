@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - dev
+      - feat-auth
 
 concurrency:
   group: dev-deploy-${{ github.ref }}
