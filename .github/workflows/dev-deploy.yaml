@@ -6,6 +6,10 @@ on:
       - dev
       - feat-auth
 
+permissions:
+  contents: read
+  packages: write
+
 concurrency:
   group: dev-deploy-${{ github.ref }}
   cancel-in-progress: true
