@@ -7,15 +7,11 @@ on:
         required: true
         type: string
         description: "Deployment environment (dev or prod)"
-    secrets:
-      VITE_API_BASE_URL:
-        required: true
-      VITE_GOOGLE_CLIENT_ID:
-        required: true
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    environment: ${{ inputs.ENVIRONMENT_NAME }}
     permissions:
       contents: read
       packages: write
@@ -43,8 +39,8 @@ jobs:
           context: .
           push: true
           build-args: |
-            VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
-            VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+            VITE_API_BASE_URL=${{ vars.VITE_API_BASE_URL }}
+            VITE_GOOGLE_CLIENT_ID=${{ vars.VITE_GOOGLE_CLIENT_ID }}
           tags: |
             ghcr.io/${{ env.REPO }}/${{ inputs.ENVIRONMENT_NAME }}:${{ github.sha }}
           cache-from: type=gha
