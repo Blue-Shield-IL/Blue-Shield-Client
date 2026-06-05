@@ -32,7 +32,7 @@ const LoginPage = () => {
     register,
     handleSubmit,
     watch,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors },
   } = useForm<LoginFormValues>({
     defaultValues: { email: "", password: "", rememberMe: false },
   });
@@ -104,8 +104,16 @@ const LoginPage = () => {
                 placeholder="you@example.com"
                 autoComplete="email"
                 disabled={isSubmitting}
+                error={!!errors.email}
+                helperText={errors.email?.message}
                 sx={styles.textField}
-                {...register("email", { required: true })}
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Invalid email format",
+                  },
+                })}
               />
             </Box>
 
@@ -121,8 +129,10 @@ const LoginPage = () => {
                   placeholder="Enter your password"
                   autoComplete="current-password"
                   disabled={isSubmitting}
+                  error={!!errors.password}
+                  helperText={errors.password?.message}
                   sx={styles.textField}
-                  {...register("password", { required: true })}
+                  {...register("password", { required: "Password is required" })}
                 />
                 <IconButton
                   sx={styles.eyeButton}
