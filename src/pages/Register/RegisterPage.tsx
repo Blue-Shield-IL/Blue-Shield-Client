@@ -47,7 +47,11 @@ const RegisterPage = () => {
     setFieldErrors([]);
 
     try {
-      await authRegister({ name: data.name, email: data.email, password: data.password });
+      await authRegister({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      });
       navigate(ROUTES.ONBOARDING);
     } catch (err) {
       const axiosError = err as AxiosError<ApiError>;
@@ -66,8 +70,11 @@ const RegisterPage = () => {
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
-    if (!credentialResponse.credential) return setError("Google sign-up failed.");
+  const handleGoogleSuccess = async (credentialResponse: {
+    credential?: string;
+  }) => {
+    if (!credentialResponse.credential)
+      return setError("Google sign-up failed.");
 
     setError("");
     setFieldErrors([]);
@@ -86,11 +93,20 @@ const RegisterPage = () => {
         <Box sx={styles.brand}>
           <Box sx={styles.brandIcon}>
             <svg width="160" height="160" viewBox="0 0 32 32" fill="none">
-              <path d="M16 3L5 7.5v8.5c0 7.5 11 13 11 13s11-5.5 11-13V7.5L16 3z" stroke="white" strokeWidth="1.5" fill="none" />
+              <path
+                d="M16 3L5 7.5v8.5c0 7.5 11 13 11 13s11-5.5 11-13V7.5L16 3z"
+                stroke="white"
+                strokeWidth="1.5"
+                fill="none"
+              />
               <clipPath id="leftHalfRegister">
                 <rect x="5" y="3" width="11" height="26" />
               </clipPath>
-              <path d="M16 3L5 7.5v8.5c0 7.5 11 13 11 13s11-5.5 11-13V7.5L16 3z" fill="white" clipPath="url(#leftHalfRegister)" />
+              <path
+                d="M16 3L5 7.5v8.5c0 7.5 11 13 11 13s11-5.5 11-13V7.5L16 3z"
+                fill="white"
+                clipPath="url(#leftHalfRegister)"
+              />
             </svg>
           </Box>
           <Typography sx={styles.brandTitle}>Blue Shield</Typography>
@@ -107,33 +123,130 @@ const RegisterPage = () => {
             or <Link to={ROUTES.LOGIN}>sign in to your account</Link>
           </Typography>
 
-          {error && <Alert severity="error" sx={styles.errorAlert}>{error}</Alert>}
+          {error && (
+            <Alert severity="error" sx={styles.errorAlert}>
+              {error}
+            </Alert>
+          )}
           {fieldErrors.length > 0 && (
             <Alert severity="error" sx={styles.errorAlert}>
-              <ul>{fieldErrors.map((fe, i) => <li key={i}>{fe}</li>)}</ul>
+              <ul>
+                {fieldErrors.map((fe, i) => (
+                  <li key={i}>{fe}</li>
+                ))}
+              </ul>
             </Alert>
           )}
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
             <Box sx={styles.field}>
-              <Typography component="label" htmlFor="name" sx={styles.fieldLabel}>Full Name</Typography>
-              <TextField id="name" type="text" fullWidth placeholder="Your full name" autoComplete="name" disabled={isSubmitting} error={!!errors.name} helperText={errors.name?.message} sx={styles.textField} {...register("name", { required: "Name is required" })} />
+              <Typography
+                component="label"
+                htmlFor="name"
+                sx={styles.fieldLabel}
+              >
+                Full Name
+              </Typography>
+              <TextField
+                id="name"
+                type="text"
+                fullWidth
+                placeholder="Your full name"
+                autoComplete="name"
+                disabled={isSubmitting}
+                error={!!errors.name}
+                helperText={errors.name?.message}
+                sx={styles.textField}
+                {...register("name", { required: "Name is required" })}
+              />
             </Box>
 
             <Box sx={styles.field}>
-              <Typography component="label" htmlFor="email" sx={styles.fieldLabel}>Email Address</Typography>
-              <TextField id="email" type="email" fullWidth placeholder="you@example.com" autoComplete="email" disabled={isSubmitting} error={!!errors.email} helperText={errors.email?.message} sx={styles.textField} {...register("email", { required: "Email is required", pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Invalid email format" } })} />
+              <Typography
+                component="label"
+                htmlFor="email"
+                sx={styles.fieldLabel}
+              >
+                Email Address
+              </Typography>
+              <TextField
+                id="email"
+                type="email"
+                fullWidth
+                placeholder="you@example.com"
+                autoComplete="email"
+                disabled={isSubmitting}
+                error={!!errors.email}
+                helperText={errors.email?.message}
+                sx={styles.textField}
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Invalid email format",
+                  },
+                })}
+              />
             </Box>
 
             <Box sx={styles.field}>
-              <Typography component="label" htmlFor="password" sx={styles.fieldLabel}>Password</Typography>
+              <Typography
+                component="label"
+                htmlFor="password"
+                sx={styles.fieldLabel}
+              >
+                Password
+              </Typography>
               <Box sx={styles.passwordWrapper}>
-                <TextField id="password" type={showPassword ? "text" : "password"} fullWidth placeholder="Create a password" autoComplete="new-password" disabled={isSubmitting} error={!!errors.password} helperText={errors.password?.message} sx={styles.textField} {...register("password", { required: "Password is required", minLength: { value: 8, message: "At least 8 characters" }, validate: { hasLetter: v => /[a-zA-Z]/.test(v) || "Must contain a letter", hasNumber: v => /\d/.test(v) || "Must contain a number", hasSymbol: v => /[^a-zA-Z0-9]/.test(v) || "Must contain a symbol" } })} />
-                <IconButton sx={styles.eyeButton} onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Hide password" : "Show password"}>
+                <TextField
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  fullWidth
+                  placeholder="Create a password"
+                  autoComplete="new-password"
+                  disabled={isSubmitting}
+                  sx={styles.textField}
+                  {...register("password", {
+                    required: "Password is required",
+                    minLength: { value: 8, message: "At least 8 characters" },
+                    validate: {
+                      hasLetter: v =>
+                        /[a-zA-Z]/.test(v) || "Must contain a letter",
+                      hasNumber: v => /\d/.test(v) || "Must contain a number",
+                      hasSymbol: v =>
+                        /[^a-zA-Z0-9]/.test(v) || "Must contain a symbol",
+                    },
+                  })}
+                />
+                <IconButton
+                  sx={styles.eyeButton}
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
                   {showPassword ? (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
                   ) : (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
                   )}
                 </IconButton>
               </Box>
@@ -141,11 +254,36 @@ const RegisterPage = () => {
             </Box>
 
             <Box sx={styles.field}>
-              <Typography component="label" htmlFor="confirmPassword" sx={styles.fieldLabel}>Confirm Password</Typography>
-              <TextField id="confirmPassword" type="password" fullWidth placeholder="Confirm your password" autoComplete="new-password" disabled={isSubmitting} error={!!errors.confirmPassword} helperText={errors.confirmPassword?.message} sx={styles.textField} {...register("confirmPassword", { required: "Please confirm your password", validate: v => v === password || "Passwords do not match" })} />
+              <Typography
+                component="label"
+                htmlFor="confirmPassword"
+                sx={styles.fieldLabel}
+              >
+                Confirm Password
+              </Typography>
+              <TextField
+                id="confirmPassword"
+                type="password"
+                fullWidth
+                placeholder="Confirm your password"
+                autoComplete="new-password"
+                disabled={isSubmitting}
+                error={!!errors.confirmPassword}
+                helperText={errors.confirmPassword?.message}
+                sx={styles.textField}
+                {...register("confirmPassword", {
+                  required: "Please confirm your password",
+                  validate: v => v === password || "Passwords do not match",
+                })}
+              />
             </Box>
 
-            <Button type="submit" variant="contained" disabled={isSubmitting} sx={styles.submitButton}>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isSubmitting}
+              sx={styles.submitButton}
+            >
               {isSubmitting ? "Creating account..." : "Create Account"}
             </Button>
           </form>
