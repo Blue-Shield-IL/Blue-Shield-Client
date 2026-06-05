@@ -2,7 +2,12 @@ import { AuthContext } from "./useAuth";
 import * as authService from "services/authService";
 import { setAccessToken } from "config/axiosInstance";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
-import type { GoogleAuthRequest, LoginRequest, RegisterRequest, UserInfo } from "interfaces/auth";
+import type {
+  GoogleAuthRequest,
+  LoginRequest,
+  RegisterRequest,
+  UserInfo,
+} from "interfaces/auth";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserInfo | null>(null);
@@ -68,7 +73,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, isLoading, login, register, googleAuth, logout }}
+      value={{
+        user,
+        isAuthenticated,
+        isLoading,
+        login,
+        register,
+        googleAuth,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>

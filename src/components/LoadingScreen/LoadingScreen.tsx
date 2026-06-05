@@ -1,5 +1,5 @@
-import { Box, Typography, keyframes } from "@mui/material";
 import { colors } from "constants/styles";
+import { Box, Typography, keyframes } from "@mui/material";
 
 const pulse = keyframes`
   0%, 100% { transform: scale(1); opacity: 0.8; }
@@ -48,7 +48,13 @@ const LoadingScreen = () => (
       },
     }}
   >
-    <Box sx={{ animation: `${pulse} 2s ease-in-out infinite`, position: "relative", zIndex: 1 }}>
+    <Box
+      sx={{
+        animation: `${pulse} 2s ease-in-out infinite`,
+        position: "relative",
+        zIndex: 1,
+      }}
+    >
       <svg width="120" height="120" viewBox="0 0 32 32" fill="none">
         <path
           d="M16 3L5 7.5v8.5c0 7.5 11 13 11 13s11-5.5 11-13V7.5L16 3z"

@@ -1,10 +1,10 @@
 import styles from "./App.style";
 import MuiTheme from "./MuiTheme";
-import { Box } from "@mui/material";
 import LoginPage from "pages/Login";
+import { Box } from "@mui/material";
 import ProfilePage from "pages/Profile";
-import { ROUTES } from "constants/routes";
 import RegisterPage from "pages/Register";
+import { ROUTES } from "constants/routes";
 import DashboardPage from "pages/Dashboard";
 import OnboardingPage from "pages/Onboarding";
 import { AuthProvider } from "contexts/authContext";

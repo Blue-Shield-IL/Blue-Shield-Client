@@ -3,9 +3,15 @@ import useAuth from "contexts/authContext";
 import { useEffect, useState } from "react";
 import styles from "./OnboardingPage.style";
 import { useNavigate } from "react-router-dom";
-import { Alert, Box, Button, CircularProgress, Typography } from "@mui/material";
-import * as keywordsService from "services/keywordsService";
 import type { Topic } from "services/keywordsService";
+import * as keywordsService from "services/keywordsService";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Typography,
+} from "@mui/material";
 
 const OnboardingPage = () => {
   const navigate = useNavigate();

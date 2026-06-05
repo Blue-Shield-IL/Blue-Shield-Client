@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import styles from "./ProfilePage.style";
 import { ROUTES } from "constants/routes";
 import useAuth from "contexts/authContext";
-import styles from "./ProfilePage.style";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as authService from "services/authService";
-import { Box, Button, Chip, CircularProgress, Typography } from "@mui/material";
 import * as keywordsService from "services/keywordsService";
+import { Box, Button, Chip, CircularProgress, Typography } from "@mui/material";
 
 interface Keyword {
   id: string;
@@ -83,7 +83,7 @@ const ProfilePage = () => {
             </Box>
           ) : keywords.length > 0 ? (
             <Box sx={styles.keywordsContainer}>
-              {keywords.map((keyword) => (
+              {keywords.map(keyword => (
                 <Chip
                   key={keyword.id}
                   label={keyword.word}
@@ -93,7 +93,8 @@ const ProfilePage = () => {
             </Box>
           ) : (
             <Typography sx={styles.emptyKeywords}>
-              No keywords selected yet. Complete onboarding to set your preferences.
+              No keywords selected yet. Complete onboarding to set your
+              preferences.
             </Typography>
           )}
         </Box>
@@ -110,7 +111,8 @@ const ProfilePage = () => {
             color="error"
             disabled={isDeleting}
             onClick={async () => {
-              if (!window.confirm("Are you sure? This cannot be undone.")) return;
+              if (!window.confirm("Are you sure? This cannot be undone."))
+                return;
               setIsDeleting(true);
               try {
                 await authService.deleteAccount();
