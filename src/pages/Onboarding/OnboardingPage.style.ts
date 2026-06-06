@@ -45,6 +45,12 @@ const styles = {
     },
   },
 
+  loadingContainer: {
+    display: "flex",
+    justifyContent: "center",
+    py: 4,
+  },
+
   chip: {
     display: "flex",
     alignItems: "center",
@@ -87,6 +93,13 @@ const styles = {
 
   chipIcon: {
     fontSize: "20px",
+  },
+
+  hiddenCheckbox: {
+    position: "absolute",
+    opacity: 0,
+    width: 1,
+    height: 1,
   },
 
   actions: {

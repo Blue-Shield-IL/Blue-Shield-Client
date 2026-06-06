@@ -1,4 +1,5 @@
 import { createApiInstance } from "config/axiosInstance";
+import type { Topic, Keyword } from "interfaces/keywords";
 
 const axiosInstance = createApiInstance("keywords");
 
@@ -11,14 +12,3 @@ export const getMyKeywords = async () =>
 export const submitOnboarding = async (topicIds: string[]) =>
   (await axiosInstance.post("/onboarding", { topics: topicIds })).data;
 
-export interface Topic {
-  id: string;
-  name: string;
-  icon: string | null;
-  keywords: Keyword[];
-}
-
-export interface Keyword {
-  id: string;
-  word: string;
-}

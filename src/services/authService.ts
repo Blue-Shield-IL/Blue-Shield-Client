@@ -6,7 +6,7 @@ import type {
   GoogleAuthRequest,
 } from "interfaces/auth";
 
-const axiosInstance = createApiInstance("auth", true);
+const axiosInstance = createApiInstance("auth");
 
 export const register = async (data: RegisterRequest) =>
   (await axiosInstance.post<AuthResponse>("/register", data)).data;
@@ -18,7 +18,7 @@ export const googleAuth = async (data: GoogleAuthRequest) =>
   (await axiosInstance.post<AuthResponse>("/google", data)).data;
 
 export const refresh = async () =>
-  (await axiosInstance.post<{ accessToken: string }>("/refresh")).data;
+  (await axiosInstance.post<AuthResponse>("/refresh")).data;
 
 export const logout = async () => {
   await axiosInstance.post("/logout");

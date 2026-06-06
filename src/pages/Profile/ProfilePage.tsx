@@ -1,38 +1,35 @@
 import styles from "./ProfilePage.style";
 import { ROUTES } from "constants/routes";
 import useAuth from "contexts/authContext";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import * as authService from "services/authService";
-import * as keywordsService from "services/keywordsService";
-import { Box, Button, Chip, CircularProgress, Typography } from "@mui/material";
 
-interface Keyword {
-  id: string;
-  word: string;
-}
+import * as keywordsService from "services/keywordsService";
+import { Box, Button, Chip, CircularProgress, Typography, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from "@mui/material";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const [keywords, setKeywords] = useState<Keyword[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: keywords = [], isLoading } = useQuery({
+    queryKey: ["keywords"],
+    queryFn: keywordsService.getMyKeywords,
+  });
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchKeywords = async () => {
-      try {
-        const data = await keywordsService.getMyKeywords();
-        setKeywords(data);
-      } catch {
-        setKeywords([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchKeywords();
-  }, []);
+  const handleDelete = async () => {
+    setIsModalOpen(false);
+    setIsDeleting(true);
+    try {
+      await authService.deleteAccount();
+      await logout();
+      navigate(ROUTES.LOGIN);
+    } catch {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <Box sx={styles.root}>
@@ -110,24 +107,28 @@ const ProfilePage = () => {
             variant="outlined"
             color="error"
             disabled={isDeleting}
-            onClick={async () => {
-              if (!window.confirm("Are you sure? This cannot be undone."))
-                return;
-              setIsDeleting(true);
-              try {
-                await authService.deleteAccount();
-                await logout();
-                navigate(ROUTES.LOGIN);
-              } catch {
-                setIsDeleting(false);
-              }
-            }}
+            onClick={() => setIsModalOpen(true)}
             sx={{ fontWeight: 600 }}
           >
             {isDeleting ? "Deleting..." : "Delete Account"}
           </Button>
         </Box>
       </Box>
+
+      <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <DialogTitle>Delete Account</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to permanently delete your account? This action cannot be undone and all your data will be lost.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+          <Button onClick={handleDelete} color="error" variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

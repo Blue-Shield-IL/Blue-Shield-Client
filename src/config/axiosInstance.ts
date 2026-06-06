@@ -6,8 +6,6 @@ export const setAccessToken = (token: string | null) => {
   accessToken = token;
 };
 
-export const getAccessToken = () => accessToken;
-
 export const createApiInstance = (basePath: string, addToken = true) => {
   const instance = axios.create({
     baseURL: `${import.meta.env.VITE_API_BASE_URL}/${basePath}`,
@@ -19,6 +17,7 @@ export const createApiInstance = (basePath: string, addToken = true) => {
       if (accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`;
       }
+
       return config;
     });
 
@@ -41,12 +40,14 @@ export const createApiInstance = (basePath: string, addToken = true) => {
             );
             accessToken = data.accessToken;
             originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
             return instance(originalRequest);
           } catch {
             accessToken = null;
             if (window.location.pathname !== "/login") {
               window.location.href = "/login";
             }
+
             return Promise.reject(error);
           }
         }

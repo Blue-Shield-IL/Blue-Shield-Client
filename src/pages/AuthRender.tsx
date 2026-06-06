@@ -16,20 +16,18 @@ export const ProtectedRoute = ({ children }: RouteGuardProps) => {
   ) : !isAuthenticated ? (
     <Navigate to={ROUTES.LOGIN} replace />
   ) : (
-    <>{children}</>
+    children
   );
 };
 
 export const PublicRoute = ({ children }: RouteGuardProps) => {
   const { isAuthenticated, isLoading, user } = useAuth();
 
-  if (isLoading) return <LoadingScreen />;
-
-  if (isAuthenticated) {
-    const destination =
-      user?.isOnboarded === false ? ROUTES.ONBOARDING : ROUTES.DASHBOARD;
-    return <Navigate to={destination} replace />;
-  }
-
-  return <>{children}</>;
+  return isLoading ? (
+    <LoadingScreen />
+  ) : isAuthenticated ? (
+    <Navigate to={user?.isOnboarded === false ? ROUTES.ONBOARDING : ROUTES.DASHBOARD} replace />
+  ) : (
+    children
+  );
 };

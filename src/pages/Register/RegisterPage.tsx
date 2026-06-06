@@ -2,11 +2,13 @@ import { useState } from "react";
 import { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { ROUTES } from "constants/routes";
+import { PASSWORD_VALIDATION_RULES } from "constants/validation";
 import styles from "./RegisterPage.style";
 import useAuth from "contexts/authContext";
 import type { ApiError } from "interfaces/auth";
 import { GoogleLogin } from "@react-oauth/google";
 import { Link, useNavigate } from "react-router-dom";
+import { Logo, EyeOpen, EyeClosed } from "components/Svg";
 import PasswordStrengthIndicator from "components/PasswordValidator";
 import {
   Box,
@@ -73,8 +75,9 @@ const RegisterPage = () => {
   const handleGoogleSuccess = async (credentialResponse: {
     credential?: string;
   }) => {
-    if (!credentialResponse.credential)
+    if (!credentialResponse.credential) {
       return setError("Google sign-up failed.");
+    }
 
     setError("");
     setFieldErrors([]);
@@ -92,22 +95,7 @@ const RegisterPage = () => {
       <Box sx={styles.leftPanel}>
         <Box sx={styles.brand}>
           <Box sx={styles.brandIcon}>
-            <svg width="160" height="160" viewBox="0 0 32 32" fill="none">
-              <path
-                d="M16 3L5 7.5v8.5c0 7.5 11 13 11 13s11-5.5 11-13V7.5L16 3z"
-                stroke="white"
-                strokeWidth="1.5"
-                fill="none"
-              />
-              <clipPath id="leftHalfRegister">
-                <rect x="5" y="3" width="11" height="26" />
-              </clipPath>
-              <path
-                d="M16 3L5 7.5v8.5c0 7.5 11 13 11 13s11-5.5 11-13V7.5L16 3z"
-                fill="white"
-                clipPath="url(#leftHalfRegister)"
-              />
-            </svg>
+            <Logo width="160" height="160" />
           </Box>
           <Typography sx={styles.brandTitle}>Blue Shield</Typography>
           <Typography sx={styles.brandSubtitle}>
@@ -206,48 +194,14 @@ const RegisterPage = () => {
                   autoComplete="new-password"
                   disabled={isSubmitting}
                   sx={styles.textField}
-                  {...register("password", {
-                    required: "Password is required",
-                    minLength: { value: 8, message: "At least 8 characters" },
-                    validate: {
-                      hasLetter: v =>
-                        /[a-zA-Z]/.test(v) || "Must contain a letter",
-                      hasNumber: v => /\d/.test(v) || "Must contain a number",
-                      hasSymbol: v =>
-                        /[^a-zA-Z0-9]/.test(v) || "Must contain a symbol",
-                    },
-                  })}
+                  {...register("password", PASSWORD_VALIDATION_RULES)}
                 />
                 <IconButton
                   sx={styles.eyeButton}
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? (
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" />
-                      <line x1="1" y1="1" x2="23" y2="23" />
-                    </svg>
-                  ) : (
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  )}
+                  {showPassword ? <EyeClosed /> : <EyeOpen />}
                 </IconButton>
               </Box>
               <PasswordStrengthIndicator password={password} />

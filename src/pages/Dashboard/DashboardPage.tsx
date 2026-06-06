@@ -14,10 +14,11 @@ const DashboardPage = () => {
     setIsLoggingOut(true);
     try {
       await logout();
-      navigate(ROUTES.LOGIN);
     } catch {
-      navigate(ROUTES.LOGIN);
+      // Logout API failure should not block client-side cleanup
+      console.error("Logout API failure");
     } finally {
+      navigate(ROUTES.LOGIN);
       setIsLoggingOut(false);
     }
   };

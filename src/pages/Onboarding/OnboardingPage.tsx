@@ -3,8 +3,8 @@ import useAuth from "contexts/authContext";
 import { useEffect, useState } from "react";
 import styles from "./OnboardingPage.style";
 import { useNavigate } from "react-router-dom";
-import type { Topic } from "services/keywordsService";
 import * as keywordsService from "services/keywordsService";
+import { useQuery } from "@tanstack/react-query";
 import {
   Alert,
   Box,
@@ -15,11 +15,14 @@ import {
 
 const OnboardingPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, refreshAuth } = useAuth();
 
-  const [topics, setTopics] = useState<Topic[]>([]);
+  const { data: topics = [], isLoading: isTopicsLoading, isError: isTopicsError } = useQuery({
+    queryKey: ["topics"],
+    queryFn: keywordsService.getTopics,
+  });
+
   const [selectedTopicIds, setSelectedTopicIds] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -29,20 +32,7 @@ const OnboardingPage = () => {
     }
   }, [user, navigate]);
 
-  useEffect(() => {
-    const fetchTopics = async () => {
-      try {
-        const data = await keywordsService.getTopics();
-        setTopics(data);
-      } catch {
-        setError("Failed to load topics.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
-    fetchTopics();
-  }, []);
 
   const handleTopicToggle = (topicId: string) => {
     setSelectedTopicIds(prev =>
@@ -59,6 +49,7 @@ const OnboardingPage = () => {
     setIsSubmitting(true);
     try {
       await keywordsService.submitOnboarding(selectedTopicIds);
+      await refreshAuth();
       navigate(ROUTES.DASHBOARD);
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { message?: string } } };
@@ -70,8 +61,6 @@ const OnboardingPage = () => {
     }
   };
 
-  if (user?.isOnboarded) return null;
-
   return (
     <Box sx={styles.container}>
       <Typography sx={styles.title}>Welcome to Blue Shield</Typography>
@@ -79,14 +68,14 @@ const OnboardingPage = () => {
         Select the topics you're interested in to personalize your dashboard.
       </Typography>
 
-      {error && (
+      {(error || isTopicsError) && (
         <Alert severity="error" sx={styles.errorAlert} role="alert">
-          {error}
+          {error || "Failed to load topics."}
         </Alert>
       )}
 
-      {isLoading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+      {isTopicsLoading ? (
+        <Box sx={styles.loadingContainer}>
           <CircularProgress />
         </Box>
       ) : (
@@ -104,7 +93,7 @@ const OnboardingPage = () => {
                   checked={isSelected}
                   onChange={() => handleTopicToggle(topic.id)}
                   disabled={isSubmitting}
-                  style={{ display: "none" }}
+                  style={styles.hiddenCheckbox as React.CSSProperties}
                 />
                 <Typography component="span" sx={styles.chipIcon}>
                   {topic.icon || "📌"}

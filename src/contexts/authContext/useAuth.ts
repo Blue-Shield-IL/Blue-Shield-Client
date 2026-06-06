@@ -14,6 +14,7 @@ export interface AuthContextType {
   register: (data: RegisterRequest) => Promise<UserInfo>;
   googleAuth: (data: GoogleAuthRequest) => Promise<UserInfo>;
   logout: () => Promise<void>;
+  refreshAuth: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType>(

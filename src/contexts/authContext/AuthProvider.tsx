@@ -1,7 +1,7 @@
 import { AuthContext } from "./useAuth";
 import * as authService from "services/authService";
 import { setAccessToken } from "config/axiosInstance";
-import { type ReactNode, useCallback, useEffect, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useState, useMemo } from "react";
 import type {
   GoogleAuthRequest,
   LoginRequest,
@@ -13,19 +13,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const isAuthenticated = user !== null;
+  const isAuthenticated = useMemo(() => user !== null, [user]);
 
   const login = useCallback(async (data: LoginRequest) => {
-    const response = await authService.login(data);
-    setAccessToken(response.accessToken);
-    setUser(response.user);
-    return response.user;
+    const { accessToken, user: userRes } = await authService.login(data);
+    setAccessToken(accessToken);
+    setUser(userRes);
+
+    return userRes;
   }, []);
 
   const register = useCallback(async (data: RegisterRequest) => {
     const response = await authService.register(data);
     setAccessToken(response.accessToken);
     setUser(response.user);
+
     return response.user;
   }, []);
 
@@ -33,34 +35,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const response = await authService.googleAuth(data);
     setAccessToken(response.accessToken);
     setUser(response.user);
+
     return response.user;
   }, []);
 
   const logout = useCallback(async () => {
     try {
       await authService.logout();
-    } catch {
+    } catch (error) {
       // Logout API failure should not block client-side cleanup
+      console.error("Logout API failure", error);
+    } finally {
+      setAccessToken(null);
+      setUser(null);
     }
-    setAccessToken(null);
-    setUser(null);
+  }, []);
+
+  const refreshAuth = useCallback(async () => {
+    const { accessToken, user: userRes } = await authService.refresh();
+    setAccessToken(accessToken);
+    setUser(userRes);
   }, []);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { accessToken } = await authService.refresh();
-        setAccessToken(accessToken);
-
-        // Decode user from JWT payload
-        const payload = JSON.parse(atob(accessToken.split(".")[1]));
-        setUser({
-          id: payload.sub,
-          name: payload.name ?? null,
-          email: payload.email,
-          isOnboarded: payload.isOnboarded ?? false,
-          authProvider: payload.authProvider ?? "local",
-        });
+        await refreshAuth();
       } catch {
         // Not authenticated — stay on login
       } finally {
@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     checkAuth();
-  }, []);
+  }, [refreshAuth]);
 
   return (
     <AuthContext.Provider
@@ -81,6 +81,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         register,
         googleAuth,
         logout,
+        refreshAuth,
       }}
     >
       {children}

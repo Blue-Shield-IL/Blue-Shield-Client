@@ -6,7 +6,6 @@ on:
       ENVIRONMENT_NAME:
         required: true
         type: string
-        description: "Deployment environment (dev or prod)"
 
 jobs:
   build-and-push:
