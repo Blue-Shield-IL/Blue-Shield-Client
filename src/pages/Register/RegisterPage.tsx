@@ -2,13 +2,13 @@ import { useState } from "react";
 import { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { ROUTES } from "constants/routes";
-import { PASSWORD_VALIDATION_RULES } from "constants/validation";
 import styles from "./RegisterPage.style";
 import useAuth from "contexts/authContext";
 import type { ApiError } from "interfaces/auth";
 import { GoogleLogin } from "@react-oauth/google";
 import { Link, useNavigate } from "react-router-dom";
 import { Logo, EyeOpen, EyeClosed } from "components/Svg";
+import { PASSWORD_VALIDATION_RULES } from "constants/validation";
 import PasswordStrengthIndicator from "components/PasswordValidator";
 import {
   Box,

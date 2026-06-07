@@ -3,8 +3,8 @@ import useAuth from "contexts/authContext";
 import { useEffect, useState } from "react";
 import styles from "./OnboardingPage.style";
 import { useNavigate } from "react-router-dom";
-import * as keywordsService from "services/keywordsService";
 import { useQuery } from "@tanstack/react-query";
+import * as keywordsService from "services/keywordsService";
 import {
   Alert,
   Box,
@@ -17,7 +17,11 @@ const OnboardingPage = () => {
   const navigate = useNavigate();
   const { user, refreshAuth } = useAuth();
 
-  const { data: topics = [], isLoading: isTopicsLoading, isError: isTopicsError } = useQuery({
+  const {
+    data: topics = [],
+    isLoading: isTopicsLoading,
+    isError: isTopicsError,
+  } = useQuery({
     queryKey: ["topics"],
     queryFn: keywordsService.getTopics,
   });
@@ -31,8 +35,6 @@ const OnboardingPage = () => {
       navigate(ROUTES.DASHBOARD, { replace: true });
     }
   }, [user, navigate]);
-
-
 
   const handleTopicToggle = (topicId: string) => {
     setSelectedTopicIds(prev =>

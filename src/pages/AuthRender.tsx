@@ -26,7 +26,10 @@ export const PublicRoute = ({ children }: RouteGuardProps) => {
   return isLoading ? (
     <LoadingScreen />
   ) : isAuthenticated ? (
-    <Navigate to={user?.isOnboarded === false ? ROUTES.ONBOARDING : ROUTES.DASHBOARD} replace />
+    <Navigate
+      to={user?.isOnboarded === false ? ROUTES.ONBOARDING : ROUTES.DASHBOARD}
+      replace
+    />
   ) : (
     children
   );

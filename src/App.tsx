@@ -10,8 +10,8 @@ import OnboardingPage from "pages/Onboarding";
 import { AuthProvider } from "contexts/authContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { ProtectedRoute, PublicRoute } from "pages/AuthRender";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 const queryClient = new QueryClient();
 
@@ -26,7 +26,9 @@ const appRoutes = [
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <MuiTheme>
-      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ''}>
+      <GoogleOAuthProvider
+        clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ""}
+      >
         <BrowserRouter>
           <AuthProvider>
             <Box sx={styles.root}>
@@ -41,7 +43,10 @@ const App = () => (
                     />
                   );
                 })}
-                <Route path="*" element={<Navigate to={ROUTES.LOGIN} replace />} />
+                <Route
+                  path="*"
+                  element={<Navigate to={ROUTES.LOGIN} replace />}
+                />
               </Routes>
             </Box>
           </AuthProvider>

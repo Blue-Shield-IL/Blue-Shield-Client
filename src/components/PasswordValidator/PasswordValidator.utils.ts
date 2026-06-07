@@ -6,10 +6,22 @@ interface PasswordRule {
 }
 
 export const PASSWORD_RULES: PasswordRule[] = [
-  { label: "At least 8 characters", test: (password: string) => password.length >= 8 },
-  { label: "At least one letter", test: (password: string) => /[a-zA-Z]/.test(password) },
-  { label: "At least one number", test: (password: string) => /\d/.test(password) },
-  { label: "At least one symbol", test: (password: string) => /[^a-zA-Z0-9]/.test(password) },
+  {
+    label: "At least 8 characters",
+    test: (password: string) => password.length >= 8,
+  },
+  {
+    label: "At least one letter",
+    test: (password: string) => /[a-zA-Z]/.test(password),
+  },
+  {
+    label: "At least one number",
+    test: (password: string) => /\d/.test(password),
+  },
+  {
+    label: "At least one symbol",
+    test: (password: string) => /[^a-zA-Z0-9]/.test(password),
+  },
 ];
 
 const RATE_STRENGTH = [

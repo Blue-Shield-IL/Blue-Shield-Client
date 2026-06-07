@@ -1,13 +1,24 @@
+import { useState } from "react";
 import styles from "./ProfilePage.style";
 import { ROUTES } from "constants/routes";
 import useAuth from "contexts/authContext";
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import * as authService from "services/authService";
 
 import * as keywordsService from "services/keywordsService";
-import { Box, Button, Chip, CircularProgress, Typography, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from "@mui/material";
+import {
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from "@mui/material";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -115,15 +126,22 @@ const ProfilePage = () => {
         </Box>
       </Box>
 
-      <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      <Dialog
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        slotProps={{ paper: { sx: { padding: "8px", borderRadius: "12px" } } }}
+      >
         <DialogTitle>Delete Account</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to permanently delete your account? This action cannot be undone and all your data will be lost.
+            Are you sure you want to permanently delete your account?
+            <br /> This action cannot be undone and all your data will be lost.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+          <Button color="inherit" onClick={() => setIsModalOpen(false)}>
+            Cancel
+          </Button>
           <Button onClick={handleDelete} color="error" variant="contained">
             Delete
           </Button>

@@ -1,6 +1,6 @@
-import { Box, Typography } from "@mui/material";
 import { Logo } from "components/Svg";
 import styles from "./LoadingScreen.style";
+import { Box, Typography } from "@mui/material";
 
 const LoadingScreen = () => (
   <Box sx={styles.container}>
