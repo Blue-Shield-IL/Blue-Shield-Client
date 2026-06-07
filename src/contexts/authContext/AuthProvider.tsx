@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const isAuthenticated = useMemo(() => user !== null, [user]);
+  const isAuthenticated = useMemo(() => !!user, [user]);
 
   const login = useCallback(async (data: LoginRequest) => {
     const { accessToken, user: userRes } = await authService.login(data);
@@ -24,19 +24,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const register = useCallback(async (data: RegisterRequest) => {
-    const response = await authService.register(data);
-    setAccessToken(response.accessToken);
-    setUser(response.user);
+    const { accessToken, user: userRes } = await authService.register(data);
+    setAccessToken(accessToken);
+    setUser(userRes);
 
-    return response.user;
+    return userRes;
   }, []);
 
   const googleAuth = useCallback(async (data: GoogleAuthRequest) => {
-    const response = await authService.googleAuth(data);
-    setAccessToken(response.accessToken);
-    setUser(response.user);
+    const { accessToken, user: userRes } = await authService.googleAuth(data);
+    setAccessToken(accessToken);
+    setUser(userRes);
 
-    return response.user;
+    return userRes;
   }, []);
 
   const logout = useCallback(async () => {
