@@ -3,7 +3,7 @@ import { colors, radius } from "constants/styles";
 const styles = {
   layout: {
     display: "flex",
-    height: "100%",
+    flex: 1,
     width: "100%",
     overflow: "hidden",
   },

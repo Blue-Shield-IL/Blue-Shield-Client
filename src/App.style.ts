@@ -1,7 +1,9 @@
 const styles = {
   root: {
-    height: "100dvh",
+    minHeight: "100dvh",
     width: "100%",
+    display: "flex",
+    flexDirection: "column",
   },
 };
 

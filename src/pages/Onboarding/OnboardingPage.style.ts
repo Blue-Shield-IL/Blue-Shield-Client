@@ -5,7 +5,7 @@ const styles = {
     maxWidth: "640px",
     margin: "0 auto",
     padding: "60px 24px",
-    height: "100%",
+    flex: 1,
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",

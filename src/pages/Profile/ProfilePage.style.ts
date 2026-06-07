@@ -2,7 +2,8 @@ import { colors, radius, shadows } from "constants/styles";
 
 const styles = {
   root: {
-    height: "100%",
+    minHeight: "100dvh",
+    flex: 1,
     display: "flex",
     flexDirection: "column",
     background: colors.background,
