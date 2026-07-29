@@ -1,61 +1,38 @@
-import { useState } from "react";
-import { ROUTES } from "constants/routes";
-import useAuth from "contexts/authContext";
-import styles from "./DashboardPage.style";
-import { useNavigate } from "react-router-dom";
-import { Box, Button, Typography } from "@mui/material";
+import { Box } from "@mui/material";
+import AppShell from "components/AppShell";
+import { DateRangeProvider } from "contexts/dateRangeContext";
+import ReachSummary from "./widgets/ReachSummary";
+import TrendCharts from "./widgets/TrendCharts";
+import HotspotMap from "./widgets/HotspotMap";
+import TopSources from "./widgets/TopSources";
+import MostViewed from "./widgets/MostViewed";
+import RangeFilter from "./widgets/RangeFilter";
 
 const DashboardPage = () => {
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-
-  const handleSignOut = async () => {
-    setIsLoggingOut(true);
-    try {
-      await logout();
-    } catch {
-      // Logout API failure should not block client-side cleanup
-      console.error("Logout API failure");
-    } finally {
-      navigate(ROUTES.LOGIN);
-      setIsLoggingOut(false);
-    }
-  };
-
   return (
-    <Box sx={styles.root}>
-      <Box component="header" sx={styles.header}>
-        <Typography sx={styles.headerTitle}>Dashboard</Typography>
-        <Box sx={styles.userSection}>
-          {user && (
-            <Typography sx={styles.email}>{user.name ?? user.email}</Typography>
-          )}
-          <Button
-            variant="outlined"
-            onClick={() => navigate(ROUTES.PROFILE)}
-            aria-label="Profile"
-            sx={styles.signOutButton}
-          >
-            Profile
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={handleSignOut}
-            disabled={isLoggingOut}
-            aria-label="Sign out"
-            sx={styles.signOutButton}
-          >
-            {isLoggingOut ? "Signing out..." : "Sign Out"}
-          </Button>
+    <DateRangeProvider>
+      <AppShell
+        title="Overview Dashboard"
+        subtitle="Real-time monitoring of antisemitic content collected across sources."
+        topbarContent={<RangeFilter />}
+      >
+        <ReachSummary />
+        <TrendCharts />
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", lg: "repeat(3, 1fr)" },
+            gap: 3,
+            minWidth: 0,
+          }}
+        >
+          <HotspotMap />
+          <TopSources />
+          <MostViewed />
         </Box>
-      </Box>
-      <Box component="main" sx={styles.main}>
-        <Typography sx={styles.welcome}>
-          Welcome to Blue Shield. Your personalized dashboard is ready.
-        </Typography>
-      </Box>
-    </Box>
+      </AppShell>
+    </DateRangeProvider>
   );
 };
 

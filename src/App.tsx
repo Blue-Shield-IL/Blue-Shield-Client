@@ -2,12 +2,14 @@ import styles from "./App.style";
 import MuiTheme from "./MuiTheme";
 import LoginPage from "pages/Login";
 import { Box } from "@mui/material";
-import ProfilePage from "pages/Profile";
+import SettingsPage from "pages/Settings";
 import RegisterPage from "pages/Register";
 import { ROUTES } from "constants/routes";
 import DashboardPage from "pages/Dashboard";
+import FreeSearchPage from "pages/FreeSearch";
 import OnboardingPage from "pages/Onboarding";
 import { AuthProvider } from "contexts/authContext";
+import { ThemeModeProvider } from "contexts/themeContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { ProtectedRoute, PublicRoute } from "pages/AuthRender";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -20,39 +22,42 @@ const appRoutes = [
   { path: ROUTES.REGISTER, component: <RegisterPage />, isPublic: true },
   { path: ROUTES.ONBOARDING, component: <OnboardingPage /> },
   { path: ROUTES.DASHBOARD, component: <DashboardPage /> },
-  { path: ROUTES.PROFILE, component: <ProfilePage /> },
+  { path: ROUTES.FREE_SEARCH, component: <FreeSearchPage /> },
+  { path: ROUTES.SETTINGS, component: <SettingsPage /> },
 ];
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <MuiTheme>
-      <GoogleOAuthProvider
-        clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ""}
-      >
-        <BrowserRouter>
-          <AuthProvider>
-            <Box sx={styles.root}>
-              <Routes>
-                {appRoutes.map(({ path, component, isPublic }) => {
-                  const Guard = isPublic ? PublicRoute : ProtectedRoute;
-                  return (
-                    <Route
-                      key={path}
-                      path={path}
-                      element={<Guard>{component}</Guard>}
-                    />
-                  );
-                })}
-                <Route
-                  path="*"
-                  element={<Navigate to={ROUTES.LOGIN} replace />}
-                />
-              </Routes>
-            </Box>
-          </AuthProvider>
-        </BrowserRouter>
-      </GoogleOAuthProvider>
-    </MuiTheme>
+    <ThemeModeProvider>
+      <MuiTheme>
+        <GoogleOAuthProvider
+          clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ""}
+        >
+          <BrowserRouter>
+            <AuthProvider>
+              <Box sx={styles.root}>
+                <Routes>
+                  {appRoutes.map(({ path, component, isPublic }) => {
+                    const Guard = isPublic ? PublicRoute : ProtectedRoute;
+                    return (
+                      <Route
+                        key={path}
+                        path={path}
+                        element={<Guard>{component}</Guard>}
+                      />
+                    );
+                  })}
+                  <Route
+                    path="*"
+                    element={<Navigate to={ROUTES.LOGIN} replace />}
+                  />
+                </Routes>
+              </Box>
+            </AuthProvider>
+          </BrowserRouter>
+        </GoogleOAuthProvider>
+      </MuiTheme>
+    </ThemeModeProvider>
   </QueryClientProvider>
 );
 
