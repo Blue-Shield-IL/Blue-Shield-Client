@@ -112,8 +112,8 @@ const AppTopbar = ({ children }: { children?: ReactNode }) => {
             <Typography sx={{ fontSize: "14px", fontWeight: 600, color: theme.palette.text.primary }}>
               {displayName}
             </Typography>
-            <Typography sx={{ fontSize: "12px", color: theme.palette.text.secondary }}>
-              Analyst
+            <Typography sx={{ fontSize: "12px", color: theme.palette.text.secondary, textTransform: "capitalize" }}>
+              {user?.role?.replace("-", " ") ?? "Analyst"}
             </Typography>
           </Box>
         </Box>

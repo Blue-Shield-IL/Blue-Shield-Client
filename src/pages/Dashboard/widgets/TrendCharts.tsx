@@ -9,7 +9,7 @@ import {
   YAxis,
 } from "recharts";
 
-import { useActivityTrend } from "hooks/useDashboardData";
+import { useActivityTrend, useThreatTrend } from "hooks/useDashboardData";
 import useCardStyles from "hooks/useCardStyles";
 import useDateRange from "contexts/dateRangeContext/useDateRange";
 import { formatMonthDay, formatNumber } from "../dashboardHelpers";
@@ -111,8 +111,9 @@ const ChartCard = ({
 );
 
 const TrendCharts = () => {
-  const { startDate, endDate } = useDateRange();
-  const { data = [], isLoading } = useActivityTrend({ startDate, endDate, interval: "day" });
+  const { startDate, endDate, keywords } = useDateRange();
+  const { data = [], isLoading } = useActivityTrend({ startDate, endDate, keywords, interval: "day" });
+  const { data: threatData = [], isLoading: threatLoading } = useThreatTrend({ startDate, endDate, keywords, interval: "day" });
   const styles = useCardStyles();
 
   const reachData = data.map((d) => ({
@@ -123,12 +124,16 @@ const TrendCharts = () => {
     date: formatMonthDay(d.date),
     value: d.posts,
   }));
+  const scoreData = threatData.map((d) => ({
+    date: formatMonthDay(d.date),
+    value: d.avgScore,
+  }));
 
   return (
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
+        gridTemplateColumns: { xs: "1fr", lg: "repeat(3, 1fr)" },
         gap: 3,
         minWidth: 0,
       }}
@@ -152,6 +157,16 @@ const TrendCharts = () => {
         tipSuffix="posts"
         loading={isLoading}
         allowDecimals={false}
+        styles={styles}
+      />
+      <ChartCard
+        title="Threat Score Trend"
+        subtitle="Average antisemitism score over time"
+        data={scoreData}
+        gradientId="threatGradient"
+        formatY={(v) => v.toFixed(2)}
+        tipSuffix="avg score"
+        loading={threatLoading}
         styles={styles}
       />
     </Box>

@@ -4,13 +4,16 @@ import type {
   DashboardQueryParams,
   DashboardStats,
   GeographicDistributionItem,
+  IhraCategoryItem,
   MostViewedItem,
   PostSearchParams,
   PostSearchResult,
+  SemanticSearchResult,
   SentimentDistributionItem,
   ThreatTrendItem,
   TopAuthorItem,
   TopKeywordItem,
+  TopicBreakdownItem,
   TopSourceItem,
 } from "interfaces/dashboard";
 
@@ -19,70 +22,39 @@ const dashboardApi = createApiInstance("dashboard");
 /** Convert empty strings to undefined so Axios omits them from query params */
 const orUndefined = (v: string | undefined) => (v ? v : undefined);
 
+const buildParams = (params?: DashboardQueryParams) => ({
+  startDate: orUndefined(params?.startDate),
+  endDate: orUndefined(params?.endDate),
+  keywords: params?.keywords || undefined,
+});
+
 export const getStats = async (params?: DashboardQueryParams) =>
-  (
-    await dashboardApi.get<DashboardStats>("/stats", {
-      params: {
-        startDate: orUndefined(params?.startDate),
-        endDate: orUndefined(params?.endDate),
-      },
-    })
-  ).data;
+  (await dashboardApi.get<DashboardStats>("/stats", { params: buildParams(params) })).data;
 
 export const getThreatTrend = async (params?: DashboardQueryParams) =>
   (
     await dashboardApi.get<ThreatTrendItem[]>("/threat-trend", {
-      params: {
-        startDate: orUndefined(params?.startDate),
-        endDate: orUndefined(params?.endDate),
-        interval: params?.interval,
-      },
+      params: { ...buildParams(params), interval: params?.interval },
     })
   ).data;
 
-export const getSentimentDistribution = async (
-  params?: DashboardQueryParams,
-) =>
-  (
-    await dashboardApi.get<SentimentDistributionItem[]>("/sentiment", {
-      params: {
-        startDate: orUndefined(params?.startDate),
-        endDate: orUndefined(params?.endDate),
-      },
-    })
-  ).data;
+export const getSentimentDistribution = async (params?: DashboardQueryParams) =>
+  (await dashboardApi.get<SentimentDistributionItem[]>("/sentiment", { params: buildParams(params) })).data;
 
 export const getTopKeywords = async (params?: DashboardQueryParams) =>
   (
     await dashboardApi.get<TopKeywordItem[]>("/top-keywords", {
-      params: {
-        startDate: orUndefined(params?.startDate),
-        endDate: orUndefined(params?.endDate),
-        limit: params?.limit,
-      },
+      params: { ...buildParams(params), limit: params?.limit },
     })
   ).data;
 
-export const getGeographicDistribution = async (
-  params?: DashboardQueryParams,
-) =>
-  (
-    await dashboardApi.get<GeographicDistributionItem[]>("/geographic", {
-      params: {
-        startDate: orUndefined(params?.startDate),
-        endDate: orUndefined(params?.endDate),
-      },
-    })
-  ).data;
+export const getGeographicDistribution = async (params?: DashboardQueryParams) =>
+  (await dashboardApi.get<GeographicDistributionItem[]>("/geographic", { params: buildParams(params) })).data;
 
 export const getTopAuthors = async (params?: DashboardQueryParams) =>
   (
     await dashboardApi.get<TopAuthorItem[]>("/top-authors", {
-      params: {
-        startDate: orUndefined(params?.startDate),
-        endDate: orUndefined(params?.endDate),
-        limit: params?.limit,
-      },
+      params: { ...buildParams(params), limit: params?.limit },
     })
   ).data;
 
@@ -119,45 +91,52 @@ export const translateToEnglish = async (text: string, source?: string) =>
   ).data;
 
 export const getLanguages = async () =>
-  (
-    await dashboardApi.get<{ code: string; name: string; count: number }[]>(
-      "/languages",
-    )
-  ).data;
+  (await dashboardApi.get<{ code: string; name: string; count: number }[]>("/languages")).data;
+
+export const getCountries = async () =>
+  (await dashboardApi.get<{ country: string; count: number }[]>("/countries")).data;
+
+export const getSources = async () =>
+  (await dashboardApi.get<{ name: string; count: number }[]>("/sources")).data;
 
 export const getActivityTrend = async (params?: DashboardQueryParams) =>
   (
     await dashboardApi.get<ActivityTrendItem[]>("/activity-trend", {
-      params: {
-        startDate: orUndefined(params?.startDate),
-        endDate: orUndefined(params?.endDate),
-        interval: params?.interval,
-      },
+      params: { ...buildParams(params), interval: params?.interval },
     })
   ).data;
 
 export const getTopSources = async (params?: DashboardQueryParams) =>
   (
     await dashboardApi.get<TopSourceItem[]>("/top-sources", {
-      params: {
-        startDate: orUndefined(params?.startDate),
-        endDate: orUndefined(params?.endDate),
-        limit: params?.limit,
-      },
+      params: { ...buildParams(params), limit: params?.limit },
     })
   ).data;
 
 export const getMostViewed = async (params?: DashboardQueryParams) =>
   (
     await dashboardApi.get<MostViewedItem[]>("/most-viewed", {
-      params: {
-        startDate: orUndefined(params?.startDate),
-        endDate: orUndefined(params?.endDate),
-        limit: params?.limit,
-      },
+      params: { ...buildParams(params), limit: params?.limit },
     })
   ).data;
 
 export const getDateBounds = async () =>
-  (await dashboardApi.get<{ earliest: string; latest: string }>("/date-bounds"))
-    .data;
+  (await dashboardApi.get<{ earliest: string; latest: string }>("/date-bounds")).data;
+
+export const semanticSearch = async (query: string, limit = 20) => {
+  try {
+    return (
+      await dashboardApi.get<SemanticSearchResult>("/semantic-search", {
+        params: { query, limit },
+      })
+    ).data;
+  } catch {
+    return { items: [], total: 0 } as SemanticSearchResult;
+  }
+};
+
+export const getIhraBreakdown = async (params?: DashboardQueryParams) =>
+  (await dashboardApi.get<IhraCategoryItem[]>("/ihra-breakdown", { params: buildParams(params) })).data;
+
+export const getTopicBreakdown = async (params?: DashboardQueryParams) =>
+  (await dashboardApi.get<TopicBreakdownItem[]>("/topic-breakdown", { params: buildParams(params) })).data;

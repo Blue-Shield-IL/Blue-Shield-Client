@@ -4,10 +4,12 @@ export type RangePreset = "All Time" | "Last 7 Days" | "Last 30 Days" | "Custom 
 
 export interface DateRangeContextType {
   preset: RangePreset;
-  startDate: string; // ISO date string
-  endDate: string; // ISO date string
+  startDate: string;
+  endDate: string;
+  keywords: string;
   setPreset: (preset: RangePreset) => void;
   setCustomRange: (start: string, end: string) => void;
+  setKeywords: (keywords: string) => void;
 }
 
 export const DateRangeContext = createContext<DateRangeContextType>(

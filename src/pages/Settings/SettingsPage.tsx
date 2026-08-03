@@ -67,13 +67,21 @@ const SettingsPage = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
-  const { user, logout } = useAuth();
+  const { user, logout, refreshAuth } = useAuth();
 
   const [fullName, setFullName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
-  const [role, setRole] = useState<string>("analyst");
+  const [role, setRole] = useState<string>(user?.role ?? "analyst");
   const [isDeleting, setIsDeleting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [profileMsg, setProfileMsg] = useState("");
+  const [passwordMsg, setPasswordMsg] = useState("");
 
   useEffect(() => {
     try {
@@ -84,12 +92,55 @@ const SettingsPage = () => {
     }
   }, []);
 
-  const handleRoleChange = (value: string) => {
+  const handleRoleChange = async (value: string) => {
     setRole(value);
     try {
       window.localStorage.setItem(ROLE_STORAGE_KEY, value);
     } catch {
       // ignore
+    }
+    await authService.updateProfile({ role: value });
+    await refreshAuth();
+  };
+
+  const handleProfileSave = async () => {
+    setProfileSaving(true);
+    setProfileMsg("");
+    try {
+      await authService.updateProfile({ name: fullName, email, role });
+      await refreshAuth();
+      setProfileMsg("Profile saved successfully.");
+    } catch {
+      setProfileMsg("Failed to save profile.");
+    } finally {
+      setProfileSaving(false);
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    setPasswordMsg("");
+    if (newPassword !== confirmPassword) {
+      setPasswordMsg("Passwords do not match.");
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPasswordMsg("Password must be at least 6 characters.");
+      return;
+    }
+    setPasswordSaving(true);
+    try {
+      await authService.changePassword({
+        currentPassword,
+        newPassword,
+      });
+      setPasswordMsg("Password updated successfully.");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch {
+      setPasswordMsg("Failed to change password.");
+    } finally {
+      setPasswordSaving(false);
     }
   };
 
@@ -164,48 +215,112 @@ const SettingsPage = () => {
             sx={inputSx}
           />
         </Box>
-        <Button
-          variant="contained"
-          sx={{
-            textTransform: "none",
-            borderRadius: "10px",
-            backgroundColor: "#2563EB",
-            "&:hover": { backgroundColor: "#1D4ED8" },
-          }}
-        >
-          Save Changes
-        </Button>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Button
+            variant="contained"
+            onClick={handleProfileSave}
+            disabled={profileSaving}
+            sx={{
+              textTransform: "none",
+              borderRadius: "10px",
+              backgroundColor: "#2563EB",
+              "&:hover": { backgroundColor: "#1D4ED8" },
+            }}
+          >
+            {profileSaving ? "Saving..." : "Save Changes"}
+          </Button>
+          {profileMsg && (
+            <Typography
+              sx={{
+                fontSize: "13px",
+                color: profileMsg.includes("success")
+                  ? theme.palette.success.main
+                  : theme.palette.error.main,
+              }}
+            >
+              {profileMsg}
+            </Typography>
+          )}
+        </Box>
       </SectionCard>
 
-      {/* Security */}
-      <SectionCard
-        title="Security"
-        description="Change your password to keep your account secure."
-      >
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" },
-            gap: 2,
-            mb: 2.5,
-          }}
+      {/* Security — only for local auth users (not Google) */}
+      {user?.authProvider !== "google" ? (
+        <SectionCard
+          title="Security"
+          description="Change your password to keep your account secure."
         >
-          <TextField label="Current Password" type="password" size="small" sx={inputSx} />
-          <TextField label="New Password" type="password" size="small" sx={inputSx} />
-          <TextField label="Confirm Password" type="password" size="small" sx={inputSx} />
-        </Box>
-        <Button
-          variant="contained"
-          sx={{
-            textTransform: "none",
-            borderRadius: "10px",
-            backgroundColor: "#2563EB",
-            "&:hover": { backgroundColor: "#1D4ED8" },
-          }}
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" },
+              gap: 2,
+              mb: 2.5,
+            }}
+          >
+            <TextField
+              label="Current Password"
+              type="password"
+              size="small"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              sx={inputSx}
+            />
+            <TextField
+              label="New Password"
+              type="password"
+              size="small"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              sx={inputSx}
+            />
+            <TextField
+              label="Confirm Password"
+              type="password"
+              size="small"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              sx={inputSx}
+            />
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Button
+              variant="contained"
+              onClick={handlePasswordChange}
+              disabled={passwordSaving}
+              sx={{
+                textTransform: "none",
+                borderRadius: "10px",
+                backgroundColor: "#2563EB",
+                "&:hover": { backgroundColor: "#1D4ED8" },
+              }}
+            >
+              {passwordSaving ? "Updating..." : "Update Password"}
+            </Button>
+            {passwordMsg && (
+              <Typography
+                sx={{
+                  fontSize: "13px",
+                  color: passwordMsg.includes("success") || passwordMsg.includes("updated")
+                    ? theme.palette.success.main
+                    : theme.palette.error.main,
+                }}
+              >
+                {passwordMsg}
+              </Typography>
+            )}
+          </Box>
+        </SectionCard>
+      ) : (
+        <SectionCard
+          title="Security"
+          description="Your account is linked to Google."
         >
-          Update Password
-        </Button>
-      </SectionCard>
+          <Typography sx={{ fontSize: "14px", color: theme.palette.text.secondary }}>
+            You signed in with Google. Password management is handled through your Google account.
+          </Typography>
+        </SectionCard>
+      )}
 
       {/* Personalization */}
       <SectionCard
@@ -272,6 +387,18 @@ const SettingsPage = () => {
             No keywords selected yet. Complete onboarding to set your preferences.
           </Typography>
         )}
+        <Button
+          variant="outlined"
+          onClick={() => navigate(`${ROUTES.ONBOARDING}?edit`)}
+          sx={{
+            mt: 2,
+            textTransform: "none",
+            borderRadius: "10px",
+            fontWeight: 500,
+          }}
+        >
+          Edit Keywords
+        </Button>
       </SectionCard>
 
       {/* Danger Zone */}

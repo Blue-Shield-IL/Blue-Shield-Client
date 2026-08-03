@@ -44,8 +44,8 @@ const MiniStat = ({ value, label, styles }: { value: string; label: string; styl
 );
 
 const ReachSummary = () => {
-  const { startDate, endDate, preset } = useDateRange();
-  const { data, isLoading } = useDashboardStats({ startDate, endDate });
+  const { startDate, endDate, preset, keywords } = useDateRange();
+  const { data, isLoading } = useDashboardStats({ startDate, endDate, keywords });
   const styles = useCardStyles();
 
   return (
@@ -149,7 +149,7 @@ const ReachSummary = () => {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" },
+            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(4, 1fr)" },
             gap: 1.5,
           }}
         >
@@ -166,6 +166,11 @@ const ReachSummary = () => {
           <MiniStat
             value={formatNumber(data?.avgViewsPerPost ?? 0)}
             label="Avg. Views / Post"
+            styles={styles}
+          />
+          <MiniStat
+            value={(data?.avgThreatScore ?? 0).toFixed(2)}
+            label="Avg. Threat Score"
             styles={styles}
           />
         </Box>

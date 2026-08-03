@@ -40,8 +40,8 @@ const LEGEND = [
 const HotspotMap = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
-  const { startDate, endDate } = useDateRange();
-  const { data = [], isLoading } = useGeographicDistribution({ startDate, endDate });
+  const { startDate, endDate, keywords } = useDateRange();
+  const { data = [], isLoading } = useGeographicDistribution({ startDate, endDate, keywords });
   const [hover, setHover] = useState<string | null>(null);
   const [rotation, setRotation] = useState<[number, number, number]>([-10, -25, 0]);
   const dragging = useRef(false);

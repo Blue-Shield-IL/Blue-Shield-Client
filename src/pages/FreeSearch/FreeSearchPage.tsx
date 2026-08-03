@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Autocomplete,
   Box,
@@ -6,6 +7,7 @@ import {
   Checkbox,
   CircularProgress,
   InputBase,
+  Slider,
   TextField,
   Typography,
 } from "@mui/material";
@@ -16,21 +18,24 @@ import AppShell from "components/AppShell";
 import CountryFlag from "components/CountryFlag";
 import DateRangePicker from "components/DateRangePicker";
 import type { RangePreset } from "components/DateRangePicker";
-import { COUNTRY_ISO2 } from "constants/countryFlags";
 import {
+  useCountries,
+  useLanguages,
   usePostSearch,
+  useSemanticSearch,
+  useSources,
   useTopKeywords,
-  useTopSources,
 } from "hooks/useDashboardData";
 import type { PostItem } from "interfaces/dashboard";
 import PostDetailModal from "./components/PostDetailModal";
-import { getScoreColor } from "./helpers";
+import {
+  getScoreColor,
+  LANGUAGE_OPTIONS,
+  SENTIMENT_COLORS,
+  SENTIMENT_OPTIONS,
+} from "./helpers";
 
 const PAGE_SIZE = 12;
-
-const COUNTRY_OPTIONS = Object.keys(COUNTRY_ISO2).filter(
-  (c) => !["USA", "US", "UK", "Great Britain", "Czech Republic"].includes(c),
-);
 
 const formatNumber = (n: number): string => {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -56,12 +61,22 @@ const formatDate = (iso: string | null): string => {
 const FreeSearchPage = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
+  const [searchParams] = useSearchParams();
+  const initializedFromUrl = useRef(false);
+
+  // Parse URL params for pre-fill from topic clicks
+  const urlKeywords = searchParams.get("keywords");
 
   // Filter state
   const [searchText, setSearchText] = useState("");
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
-  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
+  const [selectedKeywords, setSelectedKeywords] = useState<string[]>(
+    urlKeywords ? urlKeywords.split(",").filter(Boolean) : [],
+  );
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
+  const [selectedSentiments, setSelectedSentiments] = useState<string[]>([]);
+  const [scoreRange, setScoreRange] = useState<[number, number]>([0, 100]);
 
   // Date range state (same pattern as main page)
   const [datePreset, setDatePreset] = useState<RangePreset>("All Time");
@@ -72,20 +87,35 @@ const FreeSearchPage = () => {
   const [applied, setApplied] = useState({
     search: "",
     sources: [] as string[],
-    keywords: [] as string[],
+    keywords: urlKeywords ? urlKeywords.split(",").filter(Boolean) : ([] as string[]),
     countries: [] as string[],
+    languages: [] as string[],
+    sentiments: [] as string[],
+    minScore: undefined as number | undefined,
+    maxScore: undefined as number | undefined,
     startDate: "",
     endDate: "",
   });
+
+  // Auto-run search when arriving with URL keywords
+  useEffect(() => {
+    if (!initializedFromUrl.current && urlKeywords) {
+      initializedFromUrl.current = true;
+    }
+  }, [urlKeywords]);
 
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [selectedPost, setSelectedPost] = useState<PostItem | null>(null);
+  const [isSemanticMode, setIsSemanticMode] = useState(false);
+  const [semanticQuery, setSemanticQuery] = useState("");
 
   // Fetch dropdown options
   const { data: keywordsData } = useTopKeywords({ limit: 50 });
-  const { data: sourcesData } = useTopSources({ limit: 50 });
+  const { data: sourcesData } = useSources();
+  const { data: countriesData } = useCountries();
+  const { data: languagesData } = useLanguages();
 
   const keywordOptions = useMemo(
     () => (keywordsData || []).map((k) => k.keyword),
@@ -95,6 +125,21 @@ const FreeSearchPage = () => {
     () => (sourcesData || []).map((s) => s.name),
     [sourcesData],
   );
+  const countryOptions = useMemo(
+    () => (countriesData || []).map((c) => c.country),
+    [countriesData],
+  );
+  const languageOptions = useMemo(() => {
+    if (languagesData && languagesData.length > 0) {
+      return languagesData.map((l) => ({ code: l.code, label: l.name }));
+    }
+    return LANGUAGE_OPTIONS;
+  }, [languagesData]);
+
+  const {
+    data: semanticData,
+    isLoading: semanticLoading,
+  } = useSemanticSearch(semanticQuery, isSemanticMode && !!semanticQuery);
 
   const { data, isLoading, isError, refetch, isFetching } = usePostSearch({
     page,
@@ -103,6 +148,10 @@ const FreeSearchPage = () => {
     author: applied.sources.length ? applied.sources.join(",") : undefined,
     keywords: applied.keywords.length ? applied.keywords.join(",") : undefined,
     country: applied.countries.length ? applied.countries.join(",") : undefined,
+    language: applied.languages.length ? applied.languages.join(",") : undefined,
+    sentiment: applied.sentiments.length ? applied.sentiments.join(",") : undefined,
+    minScore: applied.minScore,
+    maxScore: applied.maxScore,
     startDate: applied.startDate || undefined,
     endDate: applied.endDate || undefined,
     sortBy,
@@ -145,6 +194,10 @@ const FreeSearchPage = () => {
       sources: selectedSources,
       keywords: selectedKeywords,
       countries: selectedCountries,
+      languages: selectedLanguages,
+      sentiments: selectedSentiments,
+      minScore: scoreRange[0] > 0 ? scoreRange[0] / 100 : undefined,
+      maxScore: scoreRange[1] < 100 ? scoreRange[1] / 100 : undefined,
       startDate,
       endDate,
     });
@@ -156,6 +209,9 @@ const FreeSearchPage = () => {
     setSelectedSources([]);
     setSelectedKeywords([]);
     setSelectedCountries([]);
+    setSelectedLanguages([]);
+    setSelectedSentiments([]);
+    setScoreRange([0, 100]);
     setDatePreset("All Time");
     setStartDate("");
     setEndDate("");
@@ -164,6 +220,10 @@ const FreeSearchPage = () => {
       sources: [],
       keywords: [],
       countries: [],
+      languages: [],
+      sentiments: [],
+      minScore: undefined,
+      maxScore: undefined,
       startDate: "",
       endDate: "",
     });
@@ -229,16 +289,40 @@ const FreeSearchPage = () => {
         >
           {/* Free text search - full width */}
           <Box sx={{ mb: 2 }}>
-            <Typography
+            <Box
               sx={{
-                fontSize: "12px",
-                fontWeight: 500,
-                color: theme.palette.text.secondary,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
                 mb: 0.75,
               }}
             >
-              Search
-            </Typography>
+              <Typography
+                sx={{
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  color: theme.palette.text.secondary,
+                }}
+              >
+                {isSemanticMode ? "Semantic Search (natural language)" : "Search"}
+              </Typography>
+              <Button
+                size="small"
+                variant={isSemanticMode ? "contained" : "outlined"}
+                onClick={() => setIsSemanticMode(!isSemanticMode)}
+                sx={{
+                  textTransform: "none",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  borderRadius: "8px",
+                  px: 1.5,
+                  py: 0.25,
+                  minHeight: 0,
+                }}
+              >
+                {isSemanticMode ? "Semantic Mode" : "Enable Semantic"}
+              </Button>
+            </Box>
             <Box sx={{ position: "relative" }}>
               <Box
                 sx={{
@@ -255,12 +339,28 @@ const FreeSearchPage = () => {
                 <SearchIcon />
               </Box>
               <InputBase
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
+                value={isSemanticMode ? semanticQuery : searchText}
+                onChange={(e) =>
+                  isSemanticMode
+                    ? setSemanticQuery(e.target.value)
+                    : setSearchText(e.target.value)
+                }
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSearch();
+                  if (e.key === "Enter") {
+                    if (isSemanticMode) {
+                      setSemanticQuery(
+                        (e.target as HTMLInputElement).value,
+                      );
+                    } else {
+                      handleSearch();
+                    }
+                  }
                 }}
-                placeholder="Free text search across posts, authors, channels..."
+                placeholder={
+                  isSemanticMode
+                    ? "Describe what you're looking for in natural language..."
+                    : "Free text search across posts, authors, channels..."
+                }
                 sx={{ ...inputStyle, pl: "36px" }}
               />
             </Box>
@@ -396,7 +496,7 @@ const FreeSearchPage = () => {
               <Autocomplete
                 multiple
                 size="small"
-                options={COUNTRY_OPTIONS}
+                options={countryOptions}
                 value={selectedCountries}
                 onChange={(_, newVal) => setSelectedCountries(newVal)}
                 disableCloseOnSelect
@@ -436,6 +536,147 @@ const FreeSearchPage = () => {
                 )}
                 sx={autocompleteStyle}
               />
+            </Box>
+          </Box>
+
+          {/* Second filter row: Language, Sentiment, Score Range */}
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: "1fr 1fr 1fr",
+              },
+              gap: 2,
+              mt: 2,
+            }}
+          >
+            {/* Language filter */}
+            <Box>
+              <Typography
+                sx={{
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  color: theme.palette.text.secondary,
+                  mb: 0.75,
+                }}
+              >
+                Language
+              </Typography>
+              <Autocomplete
+                multiple
+                size="small"
+                options={languageOptions}
+                getOptionLabel={(opt) => opt.label}
+                isOptionEqualToValue={(opt, val) => opt.code === val.code}
+                value={languageOptions.filter((l) =>
+                  selectedLanguages.includes(l.code),
+                )}
+                onChange={(_, newVal) =>
+                  setSelectedLanguages(newVal.map((v) => v.code))
+                }
+                disableCloseOnSelect
+                limitTags={2}
+                renderOption={(props, option, { selected }) => (
+                  <li {...props} key={option.code}>
+                    <Checkbox size="small" checked={selected} sx={{ mr: 1 }} />
+                    <Typography sx={{ fontSize: "13px" }}>
+                      {option.label}
+                    </Typography>
+                  </li>
+                )}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder={
+                      selectedLanguages.length === 0
+                        ? "Select languages..."
+                        : ""
+                    }
+                  />
+                )}
+                sx={autocompleteStyle}
+              />
+            </Box>
+
+            {/* Sentiment filter */}
+            <Box>
+              <Typography
+                sx={{
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  color: theme.palette.text.secondary,
+                  mb: 0.75,
+                }}
+              >
+                Sentiment
+              </Typography>
+              <Autocomplete
+                multiple
+                size="small"
+                options={SENTIMENT_OPTIONS}
+                value={selectedSentiments}
+                onChange={(_, newVal) => setSelectedSentiments(newVal)}
+                disableCloseOnSelect
+                limitTags={3}
+                renderOption={(props, option, { selected }) => (
+                  <li {...props} key={option}>
+                    <Checkbox size="small" checked={selected} sx={{ mr: 1 }} />
+                    <Box
+                      sx={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: "50%",
+                        backgroundColor:
+                          SENTIMENT_COLORS[option]?.text ?? "#8884d8",
+                        mr: 1,
+                        flexShrink: 0,
+                      }}
+                    />
+                    <Typography sx={{ fontSize: "13px" }}>{option}</Typography>
+                  </li>
+                )}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder={
+                      selectedSentiments.length === 0
+                        ? "Select sentiments..."
+                        : ""
+                    }
+                  />
+                )}
+                sx={autocompleteStyle}
+              />
+            </Box>
+
+            {/* Score range slider */}
+            <Box>
+              <Typography
+                sx={{
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  color: theme.palette.text.secondary,
+                  mb: 0.75,
+                }}
+              >
+                Score Range: {scoreRange[0]} – {scoreRange[1]}
+              </Typography>
+              <Box sx={{ px: 1, pt: 0.5 }}>
+                <Slider
+                  value={scoreRange}
+                  onChange={(_, newValue) =>
+                    setScoreRange(newValue as [number, number])
+                  }
+                  valueLabelDisplay="auto"
+                  min={0}
+                  max={100}
+                  size="small"
+                  sx={{
+                    "& .MuiSlider-thumb": { width: 14, height: 14 },
+                  }}
+                />
+              </Box>
             </Box>
           </Box>
 
@@ -519,7 +760,7 @@ const FreeSearchPage = () => {
             sx={{
               display: "grid",
               gridTemplateColumns:
-                "160px 130px 1fr 80px 90px 150px 160px 60px",
+                "160px 130px 1fr 80px 90px 90px 150px 140px 60px",
               alignItems: "center",
               px: 2,
               py: 1.5,
@@ -619,11 +860,12 @@ const FreeSearchPage = () => {
                   : "↓"
                 : ""}
             </Box>
+            <Box>Sentiment</Box>
             <Box>Keywords</Box>
             <Box sx={{ textAlign: "right" }}>Actions</Box>
           </Box>
 
-          {isLoading ? (
+          {(isSemanticMode ? semanticLoading : isLoading) ? (
             <Box
               sx={{
                 display: "flex",
@@ -657,20 +899,21 @@ const FreeSearchPage = () => {
                 Retry
               </Button>
             </Box>
-          ) : data && data.items.length > 0 ? (
+          ) : (isSemanticMode ? semanticData : data) &&
+            (isSemanticMode ? semanticData : data)!.items.length > 0 ? (
             <Box
               sx={{
                 opacity: isFetching ? 0.6 : 1,
                 transition: "opacity 0.15s",
               }}
             >
-              {data.items.map((post) => (
+              {((isSemanticMode ? semanticData : data)?.items ?? []).map((post) => (
                 <Box
                   key={post.postId}
                   sx={{
                     display: "grid",
                     gridTemplateColumns:
-                      "160px 130px 1fr 80px 90px 150px 160px 60px",
+                      "160px 130px 1fr 80px 90px 90px 150px 140px 60px",
                     alignItems: "center",
                     px: 2,
                     py: 1.5,
@@ -794,6 +1037,20 @@ const FreeSearchPage = () => {
                   >
                     {formatDate(post.createdAt)}
                   </Typography>
+                  <Box>
+                    {post.sentiment ? (
+                      <SentimentBadge sentiment={post.sentiment} />
+                    ) : (
+                      <Typography
+                        sx={{
+                          fontSize: "13px",
+                          color: theme.palette.text.secondary,
+                        }}
+                      >
+                        —
+                      </Typography>
+                    )}
+                  </Box>
                   <Box
                     sx={{
                       display: "flex",
@@ -1072,6 +1329,28 @@ const CountryChip = ({
     />
   </Box>
 );
+
+/* ─── Sentiment Badge ─────────────────────────────────────────────────── */
+const SentimentBadge = ({ sentiment }: { sentiment: string }) => {
+  const colors = SENTIMENT_COLORS[sentiment] ?? { bg: "#F1F5F9", text: "#64748B" };
+  return (
+    <Box
+      sx={{
+        display: "inline-flex",
+        alignItems: "center",
+        borderRadius: "999px",
+        px: 1,
+        py: 0.25,
+        fontSize: "11px",
+        fontWeight: 600,
+        backgroundColor: colors.bg,
+        color: colors.text,
+      }}
+    >
+      {sentiment}
+    </Box>
+  );
+};
 
 /* ─── Score Badge ──────────────────────────────────────────────────────── */
 const ScoreBadge = ({ score }: { score: number }) => {

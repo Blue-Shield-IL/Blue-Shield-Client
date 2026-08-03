@@ -4,26 +4,41 @@ import type {
   LoginRequest,
   RegisterRequest,
   GoogleAuthRequest,
+  UserInfo,
 } from "interfaces/auth";
 
-const axiosInstance = createApiInstance("auth");
+const authApi = createApiInstance("auth");
+const usersApi = createApiInstance("users");
 
 export const register = async (data: RegisterRequest) =>
-  (await axiosInstance.post<AuthResponse>("/register", data)).data;
+  (await authApi.post<AuthResponse>("/register", data)).data;
 
 export const login = async (data: LoginRequest) =>
-  (await axiosInstance.post<AuthResponse>("/login", data)).data;
+  (await authApi.post<AuthResponse>("/login", data)).data;
 
 export const googleAuth = async (data: GoogleAuthRequest) =>
-  (await axiosInstance.post<AuthResponse>("/google", data)).data;
+  (await authApi.post<AuthResponse>("/google", data)).data;
 
 export const refresh = async () =>
-  (await axiosInstance.post<AuthResponse>("/refresh")).data;
+  (await authApi.post<AuthResponse>("/refresh")).data;
 
 export const logout = async () => {
-  await axiosInstance.post("/logout");
+  await authApi.post("/logout");
 };
 
 export const deleteAccount = async () => {
-  await axiosInstance.delete("/delete-account");
+  await authApi.delete("/delete-account");
+};
+
+export const updateProfile = async (data: {
+  name?: string;
+  email?: string;
+  role?: string;
+}) => (await usersApi.patch<UserInfo>("/me", data)).data;
+
+export const changePassword = async (data: {
+  currentPassword: string;
+  newPassword: string;
+}) => {
+  await authApi.patch("/change-password", data);
 };

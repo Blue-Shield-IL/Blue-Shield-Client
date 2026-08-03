@@ -40,8 +40,8 @@ export const DateRangeProvider = ({ children }: { children: ReactNode }) => {
     startDate: "",
     endDate: new Date().toISOString(),
   });
+  const [keywords, setKeywords] = useState("");
 
-  // Once we get the earliest date from the backend, set "All Time" properly
   useEffect(() => {
     if (bounds?.earliest && preset === "All Time") {
       setDates(getPresetDates("All Time", bounds.earliest));
@@ -68,10 +68,12 @@ export const DateRangeProvider = ({ children }: { children: ReactNode }) => {
       preset,
       startDate: dates.startDate,
       endDate: dates.endDate,
+      keywords,
       setPreset,
       setCustomRange,
+      setKeywords,
     }),
-    [preset, dates, setPreset, setCustomRange],
+    [preset, dates, keywords, setPreset, setCustomRange],
   );
 
   return (

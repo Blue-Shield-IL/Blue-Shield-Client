@@ -9,13 +9,13 @@ import {
   YAxis,
 } from "recharts";
 
-import { useTopKeywords } from "hooks/useDashboardData";
+import { useIhraBreakdown } from "hooks/useDashboardData";
 import useCardStyles from "hooks/useCardStyles";
 import useDateRange from "contexts/dateRangeContext/useDateRange";
 
-const TopKeywordsWidget = () => {
+const IhraCategoryWidget = () => {
   const { startDate, endDate, keywords } = useDateRange();
-  const { data, isLoading } = useTopKeywords({ startDate, endDate, keywords, limit: 10 });
+  const { data, isLoading } = useIhraBreakdown({ startDate, endDate, keywords });
   const styles = useCardStyles();
 
   return (
@@ -32,12 +32,12 @@ const TopKeywordsWidget = () => {
       <Typography
         sx={{ fontSize: "14px", fontWeight: 600, color: styles.text.primary }}
       >
-        Top Keywords
+        IHRA Category Breakdown
       </Typography>
       <Typography
         sx={{ fontSize: "12px", color: styles.text.secondary, mt: 0.25 }}
       >
-        Most frequent trope labels
+        Posts by IHRA working definition categories
       </Typography>
 
       <Box sx={{ height: 224, width: "100%", mt: 2 }}>
@@ -68,7 +68,7 @@ const TopKeywordsWidget = () => {
               />
               <YAxis
                 type="category"
-                dataKey="keyword"
+                dataKey="label"
                 width={130}
                 tickLine={false}
                 axisLine={false}
@@ -87,7 +87,7 @@ const TopKeywordsWidget = () => {
               />
               <Bar
                 dataKey="count"
-                fill="#3B82F6"
+                fill="#F59E0B"
                 radius={[0, 4, 4, 0]}
                 barSize={14}
               />
@@ -99,4 +99,4 @@ const TopKeywordsWidget = () => {
   );
 };
 
-export default TopKeywordsWidget;
+export default IhraCategoryWidget;

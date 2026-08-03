@@ -29,6 +29,19 @@ export interface DashboardStats {
   totalViewsChange: number;
   activeSources: number;
   avgViewsPerPost: number;
+  avgThreatScore: number;
+}
+
+export interface IhraCategoryItem {
+  label: string;
+  count: number;
+}
+
+export interface TopicBreakdownItem {
+  topic: string;
+  totalViews: number;
+  postCount: number;
+  keywords: string[];
 }
 
 export interface ActivityTrendItem {
@@ -79,6 +92,7 @@ export interface DashboardQueryParams {
   endDate?: string;
   interval?: string;
   limit?: number;
+  keywords?: string;
 }
 
 export interface PostItem {
@@ -109,6 +123,11 @@ export interface PostSearchResult {
   page: number;
   pageSize: number;
   totalPages: number;
+}
+
+export interface SemanticSearchResult {
+  items: PostItem[];
+  total: number;
 }
 
 export interface PostSearchParams {

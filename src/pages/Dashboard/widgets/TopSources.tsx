@@ -7,8 +7,8 @@ import { formatNumber } from "../dashboardHelpers";
 const TopSources = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
-  const { startDate, endDate } = useDateRange();
-  const { data = [], isLoading } = useTopSources({ startDate, endDate, limit: 5 });
+  const { startDate, endDate, keywords } = useDateRange();
+  const { data = [], isLoading } = useTopSources({ startDate, endDate, keywords, limit: 5 });
 
   return (
     <Box

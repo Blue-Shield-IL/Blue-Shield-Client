@@ -14,10 +14,15 @@ import {
   searchPosts,
   translateToEnglish,
   getLanguages,
+  getCountries,
+  getSources,
   getActivityTrend,
   getTopSources,
   getMostViewed,
   getDateBounds,
+  getIhraBreakdown,
+  getTopicBreakdown,
+  semanticSearch,
 } from "services/dashboardService";
 
 const STALE_TIME = 5 * 60 * 1000;
@@ -26,6 +31,20 @@ export const useLanguages = () =>
   useQuery({
     queryKey: ["dashboard", "languages"],
     queryFn: () => getLanguages(),
+    staleTime: STALE_TIME,
+  });
+
+export const useCountries = () =>
+  useQuery({
+    queryKey: ["dashboard", "countries"],
+    queryFn: () => getCountries(),
+    staleTime: STALE_TIME,
+  });
+
+export const useSources = () =>
+  useQuery({
+    queryKey: ["dashboard", "sources"],
+    queryFn: () => getSources(),
     staleTime: STALE_TIME,
   });
 
@@ -116,4 +135,26 @@ export const useDateBounds = () =>
     queryKey: ["dashboard", "date-bounds"],
     queryFn: () => getDateBounds(),
     staleTime: STALE_TIME,
+  });
+
+export const useIhraBreakdown = (params?: DashboardQueryParams) =>
+  useQuery({
+    queryKey: ["dashboard", "ihra-breakdown", params],
+    queryFn: () => getIhraBreakdown(params),
+    staleTime: STALE_TIME,
+  });
+
+export const useTopicBreakdown = (params?: DashboardQueryParams) =>
+  useQuery({
+    queryKey: ["dashboard", "topic-breakdown", params],
+    queryFn: () => getTopicBreakdown(params),
+    staleTime: STALE_TIME,
+  });
+
+export const useSemanticSearch = (query: string, enabled: boolean) =>
+  useQuery({
+    queryKey: ["dashboard", "semantic-search", query],
+    queryFn: () => semanticSearch(query),
+    enabled: enabled && !!query,
+    staleTime: 60 * 1000,
   });

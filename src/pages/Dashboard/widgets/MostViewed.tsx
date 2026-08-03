@@ -23,8 +23,8 @@ const toModalData = (post: MostViewedItem): PostModalData => ({
 const MostViewed = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
-  const { startDate, endDate } = useDateRange();
-  const { data = [], isLoading } = useMostViewed({ startDate, endDate, limit: 5 });
+  const { startDate, endDate, keywords } = useDateRange();
+  const { data = [], isLoading } = useMostViewed({ startDate, endDate, keywords, limit: 5 });
   const [selectedPost, setSelectedPost] = useState<PostModalData | null>(null);
 
   return (
