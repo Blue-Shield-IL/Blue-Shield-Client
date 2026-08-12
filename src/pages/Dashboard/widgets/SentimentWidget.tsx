@@ -83,9 +83,9 @@ const SentimentWidget = () => {
                   fontSize: 12,
                   color: styles.text.primary,
                 }}
-                formatter={(value: number, name: string) => [
-                  `${value} (${total ? Math.round((value / total) * 100) : 0}%)`,
-                  name,
+                formatter={(value, name) => [
+                  `${value} (${total ? Math.round((Number(value) / total) * 100) : 0}%)`,
+                  name as string,
                 ]}
               />
               <Legend
