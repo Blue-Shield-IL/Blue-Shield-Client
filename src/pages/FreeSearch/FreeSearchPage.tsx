@@ -27,7 +27,7 @@ import {
   useSources,
   useTopKeywords,
 } from "hooks/useDashboardData";
-import type { PostItem, SemanticSearchItem } from "interfaces/dashboard";
+import type { PostItem } from "interfaces/dashboard";
 import PostDetailModal from "./components/PostDetailModal";
 import {
   getScoreColor,
@@ -910,7 +910,7 @@ const FreeSearchPage = () => {
                 transition: "opacity 0.15s",
               }}
             >
-              {((isSemanticMode ? semanticData : data)?.items ?? []).map((post) => (
+              {((isSemanticMode ? semanticData : data)?.items ?? []).map((post: PostItem) => (
                 <Box
                   key={post.postId}
                   sx={{
@@ -1066,7 +1066,7 @@ const FreeSearchPage = () => {
                       : post.keywords
                     )
                       .slice(0, 2)
-                      .map((tag) => (
+                      .map((tag: string) => (
                         <Box
                           key={tag}
                           sx={{

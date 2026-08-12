@@ -91,8 +91,8 @@ const ChartCard = ({
                 color: styles.text.primary,
               }}
               separator=""
-              formatter={(value: number) => [
-                `${formatNumber(value)} ${tipSuffix}`,
+              formatter={(value) => [
+                `${formatNumber(Number(value))} ${tipSuffix}`,
                 "",
               ]}
             />

@@ -211,7 +211,7 @@ const DateRangeFilter = ({
   startDate,
   endDate,
   onChange,
-  onClear,
+  onClear: _onClear,
 }: DateRangeFilterProps) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
