@@ -3,7 +3,7 @@ import useAuth from "contexts/authContext";
 import { useEffect, useRef, useState } from "react";
 import styles from "./OnboardingPage.style";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as keywordsService from "services/keywordsService";
 import {
   Alert,
@@ -13,17 +13,9 @@ import {
   Typography,
 } from "@mui/material";
 
-const ROLE_STORAGE_KEY = "blueshield.role";
-
-const ROLE_DEFAULT_TOPICS: Record<string, string[]> = {
-  analyst: [],
-  "foreign-affairs": ["Israel-Related Antisemitism", "Conflict & Escalation"],
-  communications: ["Conspiracy Theories", "Classic Antisemitic Tropes"],
-  researcher: ["Holocaust & Historical Violence", "Classic Antisemitic Tropes"],
-};
-
 const OnboardingPage = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user, refreshAuth } = useAuth();
   const [searchParams] = useSearchParams();
   const cameFromSettingsRef = useRef(searchParams.has("edit"));
@@ -64,24 +56,14 @@ const OnboardingPage = () => {
       }
 
       if (!cameFromSettings) {
-        const role =
-          user?.role ?? window.localStorage.getItem(ROLE_STORAGE_KEY) ?? "";
-        const defaults = ROLE_DEFAULT_TOPICS[role];
-        if (defaults && defaults.length > 0) {
-          const matchedIds = topics
-            .filter((t) => defaults.includes(t.name))
-            .map((t) => t.id);
-          if (matchedIds.length > 0) {
-            setSelectedTopicIds(matchedIds);
-          }
-        }
+        setSelectedTopicIds(topics.map((t) => t.id));
       }
 
       if (!cameFromSettings || (existingKeywords !== undefined)) {
         setHasPreSelected(true);
       }
     }
-  }, [topics, hasPreSelected, user?.role, cameFromSettings, existingKeywords]);
+  }, [topics, hasPreSelected, cameFromSettings, existingKeywords]);
 
   useEffect(() => {
     if (user?.isOnboarded && !cameFromSettings) {
@@ -97,13 +79,14 @@ const OnboardingPage = () => {
     );
   };
 
-  const handleSkip = () => navigate(ROUTES.DASHBOARD);
+  const handleSkip = () => navigate(cameFromSettings ? ROUTES.SETTINGS : ROUTES.DASHBOARD);
 
   const handleSubmit = async () => {
     setError("");
     setIsSubmitting(true);
     try {
       await keywordsService.submitOnboarding(selectedTopicIds);
+      await queryClient.invalidateQueries({ queryKey: ["keywords", "me"] });
       await refreshAuth();
       navigate(cameFromSettings ? ROUTES.SETTINGS : ROUTES.DASHBOARD);
     } catch (err: unknown) {

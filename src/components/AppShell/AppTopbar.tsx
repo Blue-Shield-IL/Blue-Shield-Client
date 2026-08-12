@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Box, IconButton, Tooltip, Typography, useTheme } from "@mui/material";
+import { Avatar, Box, IconButton, Tooltip, Typography, useTheme } from "@mui/material";
 import { ROUTES } from "constants/routes";
 import { useNavigate } from "react-router-dom";
 import useAuth from "contexts/authContext";
@@ -45,6 +45,7 @@ const AppTopbar = ({ children }: { children?: ReactNode }) => {
         justifyContent: "space-between",
         gap: 2,
         px: 3,
+        py: 1,
         borderBottom: `1px solid ${theme.palette.divider}`,
         backgroundColor: mode === "dark"
           ? "rgba(15,23,42,0.85)"
@@ -92,22 +93,30 @@ const AppTopbar = ({ children }: { children?: ReactNode }) => {
             },
           }}
         >
-          <Box
-            sx={{
-              width: 36,
-              height: 36,
-              borderRadius: "50%",
-              backgroundColor: mode === "dark" ? "#1E3A5F" : "#EFF6FF",
-              color: "#3B82F6",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "15px",
-              fontWeight: 700,
-            }}
-          >
-            {displayName.charAt(0).toUpperCase()}
-          </Box>
+          {user?.profilePicUrl ? (
+            <Avatar
+              src={user.profilePicUrl}
+              alt={displayName}
+              sx={{ width: 36, height: 36 }}
+            />
+          ) : (
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                backgroundColor: mode === "dark" ? "#1E3A5F" : "#EFF6FF",
+                color: "#3B82F6",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "15px",
+                fontWeight: 700,
+              }}
+            >
+              {displayName.charAt(0).toUpperCase()}
+            </Box>
+          )}
           <Box sx={{ display: { xs: "none", sm: "block" }, lineHeight: 1.2 }}>
             <Typography sx={{ fontSize: "14px", fontWeight: 600, color: theme.palette.text.primary }}>
               {displayName}

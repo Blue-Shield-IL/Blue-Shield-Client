@@ -1,7 +1,9 @@
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, IconButton, Tooltip, Typography, useTheme } from "@mui/material";
+import LogoutIcon from "@mui/icons-material/Logout";
 import { ROUTES } from "constants/routes";
 import { useLocation, useNavigate } from "react-router-dom";
 import Logo from "components/Svg/Logo";
+import useAuth from "contexts/authContext";
 import useThemeMode from "contexts/themeContext/useThemeMode";
 
 export const SIDEBAR_WIDTH = 248;
@@ -53,7 +55,13 @@ const AppSidebar = () => {
   const location = useLocation();
   const { mode } = useThemeMode();
   const theme = useTheme();
+  const { logout } = useAuth();
   const isDark = mode === "dark";
+
+  const handleLogout = async () => {
+    await logout();
+    navigate(ROUTES.LOGIN);
+  };
 
   return (
     <Box
@@ -106,7 +114,8 @@ const AppSidebar = () => {
       </Box>
 
       {/* Nav */}
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, p: 2, flex: 1 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, p: 2, flex: 1, justifyContent: "space-between" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
         {NAV.map((item) => {
           const active =
             location.pathname === item.route ||
@@ -143,6 +152,25 @@ const AppSidebar = () => {
             </Box>
           );
         })}
+        </Box>
+
+        <Tooltip title="Log out" placement="right" arrow>
+          <IconButton
+            onClick={handleLogout}
+            aria-label="Log out"
+            sx={{
+              width: 36,
+              height: 36,
+              color: theme.palette.text.secondary,
+              "&:hover": {
+                backgroundColor: isDark ? "#334155" : "#F1F5F9",
+                color: theme.palette.error.main,
+              },
+            }}
+          >
+            <LogoutIcon sx={{ fontSize: 18 }} />
+          </IconButton>
+        </Tooltip>
       </Box>
     </Box>
   );

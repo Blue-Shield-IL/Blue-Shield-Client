@@ -90,18 +90,21 @@ const DashboardContent = () => {
         onChange={handleViewModeChange}
         size="small"
         sx={{
+          gap: 1,
           "& .MuiToggleButton-root": {
             textTransform: "none",
             fontSize: "12px",
             fontWeight: 500,
             px: 1.5,
             py: 0.5,
-            borderRadius: "8px",
+            borderRadius: "8px !important",
+            border: "1px solid",
+            borderColor: "divider",
           },
         }}
       >
-        <ToggleButton value="all">All Posts</ToggleButton>
         <ToggleButton value="myTopics">My Topics</ToggleButton>
+        <ToggleButton value="all">All Posts</ToggleButton>
       </ToggleButtonGroup>
       <RangeFilter />
     </Box>

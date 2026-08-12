@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
+  Alert,
+  Avatar,
   Box,
   Button,
   Chip,
@@ -11,10 +13,12 @@ import {
   DialogTitle,
   MenuItem,
   Select,
+  Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
@@ -71,7 +75,7 @@ const SettingsPage = () => {
 
   const [fullName, setFullName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
-  const [role, setRole] = useState<string>(user?.role ?? "analyst");
+  const [role, setRole] = useState<string>(user?.role ?? localStorage.getItem(ROLE_STORAGE_KEY) ?? "analyst");
   const [isDeleting, setIsDeleting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -80,17 +84,20 @@ const SettingsPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [profileSaving, setProfileSaving] = useState(false);
   const [passwordSaving, setPasswordSaving] = useState(false);
-  const [profileMsg, setProfileMsg] = useState("");
-  const [passwordMsg, setPasswordMsg] = useState("");
+  const [pendingPic, setPendingPic] = useState<File | null>(null);
+  const [pendingPicPreview, setPendingPicPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const picUploading = profileSaving && pendingPic !== null;
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: "success" | "error" }>({ open: false, message: "", severity: "success" });
+
+  const profileDirty =
+    fullName !== (user?.name ?? "") ||
+    email !== (user?.email ?? "") ||
+    pendingPic !== null;
 
   useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(ROLE_STORAGE_KEY);
-      if (stored) setRole(stored);
-    } catch {
-      // ignore
-    }
-  }, []);
+    if (user?.role) setRole(user.role);
+  }, [user?.role]);
 
   const handleRoleChange = async (value: string) => {
     setRole(value);
@@ -103,28 +110,45 @@ const SettingsPage = () => {
     await refreshAuth();
   };
 
+  const showSnackbar = (message: string, severity: "success" | "error") => {
+    setSnackbar({ open: true, message, severity });
+  };
+
   const handleProfileSave = async () => {
     setProfileSaving(true);
-    setProfileMsg("");
     try {
+      if (pendingPic) {
+        await authService.uploadProfilePic(pendingPic);
+      }
       await authService.updateProfile({ name: fullName, email, role });
       await refreshAuth();
-      setProfileMsg("Profile saved successfully.");
+      setPendingPic(null);
+      setPendingPicPreview(null);
+      showSnackbar("Profile saved successfully.", "success");
     } catch {
-      setProfileMsg("Failed to save profile.");
+      showSnackbar("Failed to save profile.", "error");
     } finally {
       setProfileSaving(false);
     }
   };
 
+  const handlePicSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    setPendingPic(file);
+    const url = URL.createObjectURL(file);
+    setPendingPicPreview(url);
+  };
+
   const handlePasswordChange = async () => {
-    setPasswordMsg("");
     if (newPassword !== confirmPassword) {
-      setPasswordMsg("Passwords do not match.");
+      showSnackbar("Passwords do not match.", "error");
       return;
     }
     if (newPassword.length < 6) {
-      setPasswordMsg("Password must be at least 6 characters.");
+      showSnackbar("Password must be at least 6 characters.", "error");
       return;
     }
     setPasswordSaving(true);
@@ -133,19 +157,19 @@ const SettingsPage = () => {
         currentPassword,
         newPassword,
       });
-      setPasswordMsg("Password updated successfully.");
+      showSnackbar("Password updated successfully.", "success");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch {
-      setPasswordMsg("Failed to change password.");
+      showSnackbar("Failed to change password.", "error");
     } finally {
       setPasswordSaving(false);
     }
   };
 
   const { data: keywords = [], isLoading: keywordsLoading } = useQuery({
-    queryKey: ["keywords"],
+    queryKey: ["keywords", "me"],
     queryFn: keywordsService.getMyKeywords,
   });
 
@@ -171,22 +195,65 @@ const SettingsPage = () => {
     >
       {/* Profile */}
       <SectionCard title="Profile" description="Update your personal information.">
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
+        <Box sx={{ mb: 3 }}>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={handlePicSelect}
+          />
           <Box
+            onClick={() => !picUploading && fileInputRef.current?.click()}
             sx={{
-              width: 64,
-              height: 64,
+              position: "relative",
+              width: 72,
+              height: 72,
               borderRadius: "50%",
-              backgroundColor: isDark ? "rgba(59,130,246,0.15)" : "#EFF6FF",
-              color: theme.palette.primary.main,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "24px",
-              fontWeight: 700,
+              cursor: picUploading ? "default" : "pointer",
+              "&:hover .camera-overlay": { opacity: 1 },
             }}
           >
-            {(user?.name ?? user?.email ?? "U").charAt(0).toUpperCase()}
+            {(pendingPicPreview ?? user?.profilePicUrl) ? (
+              <Avatar src={pendingPicPreview ?? user?.profilePicUrl ?? undefined} alt={user?.name ?? user?.email ?? "User"} sx={{ width: 72, height: 72 }} />
+            ) : (
+              <Box
+                sx={{
+                  width: 72,
+                  height: 72,
+                  borderRadius: "50%",
+                  backgroundColor: isDark ? "rgba(59,130,246,0.15)" : "#EFF6FF",
+                  color: theme.palette.primary.main,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "26px",
+                  fontWeight: 700,
+                }}
+              >
+                {(user?.name ?? user?.email ?? "U").charAt(0).toUpperCase()}
+              </Box>
+            )}
+            <Box
+              className="camera-overlay"
+              sx={{
+                position: "absolute",
+                inset: 0,
+                borderRadius: "50%",
+                backgroundColor: "rgba(0,0,0,0.45)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                opacity: 0,
+                transition: "opacity 0.2s",
+              }}
+            >
+              {picUploading ? (
+                <CircularProgress size={20} sx={{ color: "#fff" }} />
+              ) : (
+                <CameraAltIcon sx={{ color: "#fff", fontSize: 22 }} />
+              )}
+            </Box>
           </Box>
         </Box>
         <Box
@@ -219,7 +286,7 @@ const SettingsPage = () => {
           <Button
             variant="contained"
             onClick={handleProfileSave}
-            disabled={profileSaving}
+            disabled={profileSaving || !profileDirty}
             sx={{
               textTransform: "none",
               borderRadius: "10px",
@@ -229,18 +296,6 @@ const SettingsPage = () => {
           >
             {profileSaving ? "Saving..." : "Save Changes"}
           </Button>
-          {profileMsg && (
-            <Typography
-              sx={{
-                fontSize: "13px",
-                color: profileMsg.includes("success")
-                  ? theme.palette.success.main
-                  : theme.palette.error.main,
-              }}
-            >
-              {profileMsg}
-            </Typography>
-          )}
         </Box>
       </SectionCard>
 
@@ -297,18 +352,6 @@ const SettingsPage = () => {
             >
               {passwordSaving ? "Updating..." : "Update Password"}
             </Button>
-            {passwordMsg && (
-              <Typography
-                sx={{
-                  fontSize: "13px",
-                  color: passwordMsg.includes("success") || passwordMsg.includes("updated")
-                    ? theme.palette.success.main
-                    : theme.palette.error.main,
-                }}
-              >
-                {passwordMsg}
-              </Typography>
-            )}
           </Box>
         </SectionCard>
       ) : (
@@ -438,6 +481,22 @@ const SettingsPage = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ borderRadius: "10px", fontWeight: 500 }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </AppShell>
   );
 };

@@ -151,10 +151,10 @@ export const useTopicBreakdown = (params?: DashboardQueryParams) =>
     staleTime: STALE_TIME,
   });
 
-export const useSemanticSearch = (query: string, enabled: boolean) =>
+export const useSemanticSearch = (query: string, page: number, pageSize: number, enabled: boolean) =>
   useQuery({
-    queryKey: ["dashboard", "semantic-search", query],
-    queryFn: () => semanticSearch(query),
+    queryKey: ["dashboard", "semantic-search", query, page, pageSize],
+    queryFn: () => semanticSearch(query, page, pageSize),
     enabled: enabled && !!query,
     staleTime: 60 * 1000,
   });

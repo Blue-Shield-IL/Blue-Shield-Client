@@ -42,3 +42,14 @@ export const changePassword = async (data: {
 }) => {
   await authApi.patch("/change-password", data);
 };
+
+export const uploadProfilePic = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return (
+    await usersApi.post<{ url: string }>("/me/profile-pic", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+  ).data;
+};

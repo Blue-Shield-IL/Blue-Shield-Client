@@ -13,7 +13,20 @@ import { ThemeModeProvider } from "contexts/themeContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { ProtectedRoute, PublicRoute } from "pages/AuthRender";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
+
+if ("scrollRestoration" in window.history) {
+  window.history.scrollRestoration = "manual";
+}
 
 const queryClient = new QueryClient();
 
@@ -34,6 +47,7 @@ const App = () => (
           clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ""}
         >
           <BrowserRouter>
+            <ScrollToTop />
             <AuthProvider>
               <Box sx={styles.root}>
                 <Routes>

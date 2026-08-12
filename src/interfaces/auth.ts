@@ -27,6 +27,7 @@ export interface UserInfo {
   isOnboarded: boolean;
   authProvider: string;
   role?: string;
+  profilePicUrl?: string | null;
 }
 
 export interface ApiError {

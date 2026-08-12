@@ -12,6 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import SearchIcon from "@mui/icons-material/Search";
 import { useTheme, type Theme } from "@mui/material/styles";
 
 import AppShell from "components/AppShell";
@@ -26,7 +27,7 @@ import {
   useSources,
   useTopKeywords,
 } from "hooks/useDashboardData";
-import type { PostItem } from "interfaces/dashboard";
+import type { PostItem, SemanticSearchItem } from "interfaces/dashboard";
 import PostDetailModal from "./components/PostDetailModal";
 import {
   getScoreColor,
@@ -97,6 +98,8 @@ const FreeSearchPage = () => {
     endDate: "",
   });
 
+  const topRef = useRef<HTMLDivElement>(null);
+
   // Auto-run search when arriving with URL keywords
   useEffect(() => {
     if (!initializedFromUrl.current && urlKeywords) {
@@ -109,6 +112,7 @@ const FreeSearchPage = () => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [selectedPost, setSelectedPost] = useState<PostItem | null>(null);
   const [isSemanticMode, setIsSemanticMode] = useState(false);
+  const [semanticInput, setSemanticInput] = useState("");
   const [semanticQuery, setSemanticQuery] = useState("");
 
   // Fetch dropdown options
@@ -139,7 +143,7 @@ const FreeSearchPage = () => {
   const {
     data: semanticData,
     isLoading: semanticLoading,
-  } = useSemanticSearch(semanticQuery, isSemanticMode && !!semanticQuery);
+  } = useSemanticSearch(semanticQuery, page, PAGE_SIZE, isSemanticMode && !!semanticQuery);
 
   const { data, isLoading, isError, refetch, isFetching } = usePostSearch({
     page,
@@ -230,7 +234,8 @@ const FreeSearchPage = () => {
     setPage(1);
   };
 
-  const totalPages = data?.totalPages || 1;
+  const activeData = isSemanticMode ? semanticData : data;
+  const totalPages = activeData?.totalPages || 1;
   const pageNumbers = useMemo(
     () => buildPageNumbers(page, totalPages),
     [page, totalPages],
@@ -243,7 +248,7 @@ const FreeSearchPage = () => {
     border: `1px solid ${theme.palette.divider}`,
     backgroundColor: theme.palette.background.paper,
     color: theme.palette.text.primary,
-    px: 1.5,
+    px: 1,
     fontSize: "14px",
     transition: "border-color 0.15s",
     "&:focus-within": {
@@ -257,7 +262,7 @@ const FreeSearchPage = () => {
       borderRadius: "8px",
       fontSize: "14px",
       minHeight: 40,
-      padding: "3px 8px",
+      padding: "3px 6px",
       "& .MuiOutlinedInput-notchedOutline": {
         borderColor: theme.palette.divider,
       },
@@ -276,6 +281,7 @@ const FreeSearchPage = () => {
       subtitle="Search and filter collected posts."
     >
       <Box
+        ref={topRef}
         sx={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0 }}
       >
         {/* Filter Card */}
@@ -334,23 +340,22 @@ const FreeSearchPage = () => {
                   pointerEvents: "none",
                   display: "flex",
                   alignItems: "center",
+                  zIndex: 1,
                 }}
               >
-                <SearchIcon />
+                <SearchIcon sx={{ fontSize: 18 }} />
               </Box>
               <InputBase
-                value={isSemanticMode ? semanticQuery : searchText}
+                value={isSemanticMode ? semanticInput : searchText}
                 onChange={(e) =>
                   isSemanticMode
-                    ? setSemanticQuery(e.target.value)
+                    ? setSemanticInput(e.target.value)
                     : setSearchText(e.target.value)
                 }
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     if (isSemanticMode) {
-                      setSemanticQuery(
-                        (e.target as HTMLInputElement).value,
-                      );
+                      setSemanticQuery(semanticInput.trim());
                     } else {
                       handleSearch();
                     }
@@ -741,7 +746,7 @@ const FreeSearchPage = () => {
                   color: theme.palette.text.secondary,
                 }}
               >
-                {data ? `${data.total.toLocaleString()} results` : ""}
+                {(isSemanticMode ? semanticData : data) ? `${(isSemanticMode ? semanticData : data)!.total.toLocaleString()} results` : ""}
               </Typography>
             </Box>
           </Box>
@@ -759,8 +764,7 @@ const FreeSearchPage = () => {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns:
-                "160px 130px 1fr 80px 90px 90px 150px 140px 60px",
+              gridTemplateColumns: "160px 130px 1fr 80px 90px 90px 150px 140px",
               alignItems: "center",
               px: 2,
               py: 1.5,
@@ -862,7 +866,6 @@ const FreeSearchPage = () => {
             </Box>
             <Box>Sentiment</Box>
             <Box>Keywords</Box>
-            <Box sx={{ textAlign: "right" }}>Actions</Box>
           </Box>
 
           {(isSemanticMode ? semanticLoading : isLoading) ? (
@@ -912,8 +915,7 @@ const FreeSearchPage = () => {
                   key={post.postId}
                   sx={{
                     display: "grid",
-                    gridTemplateColumns:
-                      "160px 130px 1fr 80px 90px 90px 150px 140px 60px",
+                    gridTemplateColumns: "160px 130px 1fr 80px 90px 90px 150px 140px",
                     alignItems: "center",
                     px: 2,
                     py: 1.5,
@@ -1087,33 +1089,6 @@ const FreeSearchPage = () => {
                         </Box>
                       ))}
                   </Box>
-                  <Box sx={{ textAlign: "right" }}>
-                    <Box
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedPost(post);
-                      }}
-                      sx={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: 30,
-                        height: 30,
-                        borderRadius: "8px",
-                        color: theme.palette.text.secondary,
-                        cursor: "pointer",
-                        transition: "all 0.12s",
-                        "&:hover": {
-                          backgroundColor: theme.palette.action.hover,
-                          color: theme.palette.text.primary,
-                        },
-                      }}
-                      role="button"
-                      aria-label={`View details for post by ${post.author}`}
-                    >
-                      ⋮
-                    </Box>
-                  </Box>
                 </Box>
               ))}
             </Box>
@@ -1136,7 +1111,7 @@ const FreeSearchPage = () => {
         </Box>
 
         {/* Pagination */}
-        {data && data.total > 0 && (
+        {activeData && activeData.total > 0 && (
           <Box
             sx={{
               display: "flex",
@@ -1149,7 +1124,7 @@ const FreeSearchPage = () => {
             <Typography
               sx={{ fontSize: "13px", color: theme.palette.text.secondary }}
             >
-              {data.total.toLocaleString()} results
+              {activeData.total.toLocaleString()} results
             </Typography>
             <Box
               sx={{
@@ -1403,23 +1378,6 @@ const PagerButton = ({
   >
     {children}
   </Box>
-);
-
-/* ─── Search Icon ──────────────────────────────────────────────────────── */
-const SearchIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="11" cy="11" r="7" />
-    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-  </svg>
 );
 
 /* ─── Helpers ──────────────────────────────────────────────────────────── */

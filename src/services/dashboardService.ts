@@ -123,15 +123,15 @@ export const getMostViewed = async (params?: DashboardQueryParams) =>
 export const getDateBounds = async () =>
   (await dashboardApi.get<{ earliest: string; latest: string }>("/date-bounds")).data;
 
-export const semanticSearch = async (query: string, limit = 20) => {
+export const semanticSearch = async (query: string, page = 1, pageSize = 20) => {
   try {
     return (
       await dashboardApi.get<SemanticSearchResult>("/semantic-search", {
-        params: { query, limit },
+        params: { query, page, pageSize },
       })
     ).data;
   } catch {
-    return { items: [], total: 0 } as SemanticSearchResult;
+    return { items: [], total: 0, page, pageSize, totalPages: 0 } as any;
   }
 };
 

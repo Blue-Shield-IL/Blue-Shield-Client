@@ -17,9 +17,9 @@ const ROLE_PANEL_ORDER: Record<string, PanelId[]> = {
   analyst: ["kpi", "trends", "distributions", "intelligence", "myTopics"],
   "foreign-affairs": [
     "kpi",
-    "intelligence",
-    "trends",
     "distributions",
+    "trends",
+    "intelligence",
     "myTopics",
   ],
   communications: [

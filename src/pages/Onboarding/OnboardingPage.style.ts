@@ -36,13 +36,11 @@ const styles = {
   },
 
   grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+    display: "flex",
+    flexWrap: "wrap",
+    justifyContent: "center",
     gap: "12px",
     marginBottom: "36px",
-    "@media (max-width: 768px)": {
-      gridTemplateColumns: "1fr",
-    },
   },
 
   loadingContainer: {
@@ -56,6 +54,9 @@ const styles = {
     alignItems: "center",
     gap: "10px",
     padding: "14px 16px",
+    width: "calc(50% - 6px)",
+    boxSizing: "border-box",
+    "@media (max-width: 480px)": { width: "100%" },
     border: `2px solid ${colors.border}`,
     borderRadius: radius.lg,
     cursor: "pointer",
@@ -76,6 +77,9 @@ const styles = {
     alignItems: "center",
     gap: "10px",
     padding: "14px 16px",
+    width: "calc(50% - 6px)",
+    boxSizing: "border-box",
+    "@media (max-width: 480px)": { width: "100%" },
     border: `2px solid ${colors.primary}`,
     borderRadius: radius.lg,
     cursor: "pointer",
