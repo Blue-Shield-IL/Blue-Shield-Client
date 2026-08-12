@@ -1,9 +1,9 @@
 import { ROUTES } from "constants/routes";
 import useAuth from "contexts/authContext";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./OnboardingPage.style";
-import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as keywordsService from "services/keywordsService";
 import {
   Alert,
@@ -15,7 +15,11 @@ import {
 
 const OnboardingPage = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user, refreshAuth } = useAuth();
+  const [searchParams] = useSearchParams();
+  const cameFromSettingsRef = useRef(searchParams.has("edit"));
+  const cameFromSettings = cameFromSettingsRef.current;
 
   const {
     data: topics = [],
@@ -26,15 +30,46 @@ const OnboardingPage = () => {
     queryFn: keywordsService.getTopics,
   });
 
+  const { data: existingKeywords } = useQuery({
+    queryKey: ["keywords", "me"],
+    queryFn: keywordsService.getMyKeywords,
+    enabled: cameFromSettings,
+  });
+
   const [selectedTopicIds, setSelectedTopicIds] = useState<string[]>([]);
+  const [hasPreSelected, setHasPreSelected] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (user?.isOnboarded) {
+    if (topics.length > 0 && !hasPreSelected) {
+      if (cameFromSettings && existingKeywords && existingKeywords.length > 0) {
+        const existingWords = new Set(existingKeywords.map((k) => k.word));
+        const matchedIds = topics
+          .filter((t) => t.keywords.some((kw) => existingWords.has(kw.word)))
+          .map((t) => t.id);
+        if (matchedIds.length > 0) {
+          setSelectedTopicIds(matchedIds);
+          setHasPreSelected(true);
+          return;
+        }
+      }
+
+      if (!cameFromSettings) {
+        setSelectedTopicIds(topics.map((t) => t.id));
+      }
+
+      if (!cameFromSettings || (existingKeywords !== undefined)) {
+        setHasPreSelected(true);
+      }
+    }
+  }, [topics, hasPreSelected, cameFromSettings, existingKeywords]);
+
+  useEffect(() => {
+    if (user?.isOnboarded && !cameFromSettings) {
       navigate(ROUTES.DASHBOARD, { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, navigate, cameFromSettings]);
 
   const handleTopicToggle = (topicId: string) => {
     setSelectedTopicIds(prev =>
@@ -44,15 +79,16 @@ const OnboardingPage = () => {
     );
   };
 
-  const handleSkip = () => navigate(ROUTES.DASHBOARD);
+  const handleSkip = () => navigate(cameFromSettings ? ROUTES.SETTINGS : ROUTES.DASHBOARD);
 
   const handleSubmit = async () => {
     setError("");
     setIsSubmitting(true);
     try {
       await keywordsService.submitOnboarding(selectedTopicIds);
+      await queryClient.invalidateQueries({ queryKey: ["keywords", "me"] });
       await refreshAuth();
-      navigate(ROUTES.DASHBOARD);
+      navigate(cameFromSettings ? ROUTES.SETTINGS : ROUTES.DASHBOARD);
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { message?: string } } };
       setError(

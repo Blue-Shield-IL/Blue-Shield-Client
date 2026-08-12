@@ -8,3 +8,16 @@ body {
     Roboto,
     sans-serif;
 }
+
+/* Remove Recharts default border around chart area */
+.recharts-cartesian-grid-bg {
+  stroke: none !important;
+}
+
+/* Remove focus outline when clicking on charts */
+.recharts-wrapper svg {
+  outline: none !important;
+}
+.recharts-wrapper svg:focus {
+  outline: none !important;
+}

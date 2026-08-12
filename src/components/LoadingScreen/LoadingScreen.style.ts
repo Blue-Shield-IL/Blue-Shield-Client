@@ -14,8 +14,9 @@ const shimmer = keyframes`
 
 const styles = {
   container: {
-    height: "100%",
+    minHeight: "100dvh",
     width: "100%",
+    flex: 1,
     display: "flex",
     flexDirection: "column",
     alignItems: "center",

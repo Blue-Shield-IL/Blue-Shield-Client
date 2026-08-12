@@ -159,6 +159,7 @@ const styles = {
     },
     "& .MuiInputBase-input": {
       padding: "14px 16px",
+      color: colors.text,
     },
     "& .MuiInputBase-input::placeholder": {
       color: colors.textMuted,

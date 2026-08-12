@@ -26,6 +26,8 @@ export interface UserInfo {
   email: string;
   isOnboarded: boolean;
   authProvider: string;
+  role?: string;
+  profilePicUrl?: string | null;
 }
 
 export interface ApiError {
