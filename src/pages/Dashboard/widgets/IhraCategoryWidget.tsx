@@ -1,12 +1,13 @@
 import { Box, Skeleton, Tooltip, Typography } from "@mui/material";
 
+import EmptyState from "components/EmptyState";
 import useCardStyles from "hooks/useCardStyles";
 import { useIhraBreakdown } from "hooks/useDashboardData";
 import useDateRange from "contexts/dateRangeContext/useDateRange";
 
 const IhraCategoryWidget = () => {
   const { startDate, endDate, keywords } = useDateRange();
-  const { data, isLoading } = useIhraBreakdown({
+  const { data, isLoading, isError } = useIhraBreakdown({
     startDate,
     endDate,
     keywords,
@@ -60,78 +61,86 @@ const IhraCategoryWidget = () => {
           },
         }}
       >
-        {isLoading
-          ? Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton
-                key={i}
-                variant="rectangular"
-                height={28}
-                sx={{ borderRadius: 1 }}
-              />
-            ))
-          : (data ?? []).map(item => (
-              <Tooltip
-                key={item.label}
-                title={item.label}
-                arrow
-                placement="top-start"
-              >
-                <Box>
-                  <Box
+        {isLoading ? (
+          Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton
+              key={i}
+              variant="rectangular"
+              height={28}
+              sx={{ borderRadius: 1 }}
+            />
+          ))
+        ) : isError ? (
+          <EmptyState
+            title="Unable to load categories"
+            description="Try refreshing the dashboard."
+            minHeight={220}
+          />
+        ) : (
+          (data ?? []).map(item => (
+            <Tooltip
+              key={item.label}
+              title={item.label}
+              arrow
+              placement="top-start"
+            >
+              <Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "baseline",
+                    gap: 1,
+                    mb: 0.25,
+                  }}
+                >
+                  <Typography
                     sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "baseline",
-                      gap: 1,
-                      mb: 0.25,
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        fontSize: "12px",
-                        color: styles.text.primary,
-                        fontWeight: 500,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                        flex: 1,
-                        minWidth: 0,
-                      }}
-                    >
-                      {item.label}
-                    </Typography>
-                    <Typography
-                      sx={{
-                        fontSize: "12px",
-                        fontWeight: 600,
-                        color: "#F59E0B",
-                        flexShrink: 0,
-                      }}
-                    >
-                      {item.count}
-                    </Typography>
-                  </Box>
-                  <Box
-                    sx={{
-                      height: 6,
-                      borderRadius: "3px",
-                      backgroundColor: styles.bg.hover,
+                      fontSize: "12px",
+                      color: styles.text.primary,
+                      fontWeight: 500,
                       overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      flex: 1,
+                      minWidth: 0,
                     }}
                   >
-                    <Box
-                      sx={{
-                        height: "100%",
-                        width: `${(item.count / maxCount) * 100}%`,
-                        borderRadius: "3px",
-                        backgroundColor: "#F59E0B",
-                        transition: "width 0.4s ease",
-                      }}
-                    />
-                  </Box>
+                    {item.label}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      color: "#F59E0B",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {item.count}
+                  </Typography>
                 </Box>
-              </Tooltip>
-            ))}
+                <Box
+                  sx={{
+                    height: 6,
+                    borderRadius: "3px",
+                    backgroundColor: styles.bg.hover,
+                    overflow: "hidden",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      height: "100%",
+                      width: `${(item.count / maxCount) * 100}%`,
+                      borderRadius: "3px",
+                      backgroundColor: "#F59E0B",
+                      transition: "width 0.4s ease",
+                    }}
+                  />
+                </Box>
+              </Box>
+            </Tooltip>
+          ))
+        )}
       </Box>
     </Box>
   );

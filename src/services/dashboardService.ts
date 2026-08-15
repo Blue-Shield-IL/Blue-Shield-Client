@@ -147,23 +147,12 @@ export const semanticSearch = async (
   query: string,
   page = 1,
   pageSize = 20
-) => {
-  try {
-    return (
-      await dashboardApi.get<SemanticSearchResult>("/semantic-search", {
-        params: { query, page, pageSize },
-      })
-    ).data;
-  } catch {
-    return {
-      items: [],
-      total: 0,
-      page,
-      pageSize,
-      totalPages: 0,
-    } as SemanticSearchResult;
-  }
-};
+) =>
+  (
+    await dashboardApi.get<SemanticSearchResult>("/semantic-search", {
+      params: { query, page, pageSize },
+    })
+  ).data;
 
 export const getIhraBreakdown = async (params?: DashboardQueryParams) =>
   (

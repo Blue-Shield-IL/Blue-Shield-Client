@@ -9,6 +9,7 @@ import {
   YAxis,
 } from "recharts";
 
+import EmptyState from "components/EmptyState";
 import useCardStyles from "hooks/useCardStyles";
 import useDateRange from "contexts/dateRangeContext/useDateRange";
 import { formatMonthDay, formatNumber } from "../dashboardHelpers";
@@ -22,6 +23,7 @@ interface ChartCardProps {
   formatY: (v: number) => string;
   tipSuffix: string;
   loading: boolean;
+  error: boolean;
   allowDecimals?: boolean;
   styles: ReturnType<typeof useCardStyles>;
 }
@@ -34,6 +36,7 @@ const ChartCard = ({
   formatY,
   tipSuffix,
   loading,
+  error,
   allowDecimals = true,
   styles,
 }: ChartCardProps) => (
@@ -62,6 +65,12 @@ const ChartCard = ({
           variant="rectangular"
           height="100%"
           sx={{ borderRadius: 2 }}
+        />
+      ) : error ? (
+        <EmptyState
+          title="Unable to load trend"
+          description="Try refreshing the dashboard."
+          minHeight="100%"
         />
       ) : (
         <ResponsiveContainer width="100%" height="100%">
@@ -129,13 +138,21 @@ const ChartCard = ({
 
 const TrendCharts = () => {
   const { startDate, endDate, keywords } = useDateRange();
-  const { data = [], isLoading } = useActivityTrend({
+  const {
+    data = [],
+    isLoading,
+    isError,
+  } = useActivityTrend({
     startDate,
     endDate,
     keywords,
     interval: "day",
   });
-  const { data: threatData = [], isLoading: threatLoading } = useThreatTrend({
+  const {
+    data: threatData = [],
+    isLoading: threatLoading,
+    isError: threatError,
+  } = useThreatTrend({
     startDate,
     endDate,
     keywords,
@@ -173,6 +190,7 @@ const TrendCharts = () => {
         formatY={v => formatNumber(v)}
         tipSuffix="views"
         loading={isLoading}
+        error={isError}
         styles={styles}
       />
       <ChartCard
@@ -183,6 +201,7 @@ const TrendCharts = () => {
         formatY={v => formatNumber(v)}
         tipSuffix="posts"
         loading={isLoading}
+        error={isError}
         allowDecimals={false}
         styles={styles}
       />
@@ -194,6 +213,7 @@ const TrendCharts = () => {
         formatY={v => v.toFixed(2)}
         tipSuffix="avg score"
         loading={threatLoading}
+        error={threatError}
         styles={styles}
       />
     </Box>

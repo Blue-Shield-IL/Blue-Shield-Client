@@ -40,6 +40,52 @@ const useOnboardingStyles = () => {
       },
     },
 
+    profileSection: {
+      display: "flex",
+      alignItems: "center",
+      gap: "16px",
+      padding: "16px",
+      marginBottom: "24px",
+      border: `1px solid ${theme.palette.divider}`,
+      borderRadius: radius.lg,
+      backgroundColor: theme.palette.background.paper,
+    },
+
+    profileAvatar: {
+      width: 72,
+      height: 72,
+      flexShrink: 0,
+      backgroundColor: isDark ? "rgba(59, 130, 246, 0.15)" : "#EFF6FF",
+      color: theme.palette.primary.main,
+      fontSize: "26px",
+      fontWeight: 700,
+    },
+
+    profileDetails: {
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "flex-start",
+      gap: "6px",
+      minWidth: 0,
+    },
+
+    profileLabel: {
+      fontSize: "14px",
+      fontWeight: 600,
+      color: theme.palette.text.primary,
+    },
+
+    profileHelp: {
+      fontSize: "12px",
+      color: theme.palette.text.secondary,
+    },
+
+    profileButton: {
+      marginTop: "2px",
+      textTransform: "none",
+      borderColor: theme.palette.divider,
+    },
+
     grid: {
       display: "flex",
       flexWrap: "wrap",

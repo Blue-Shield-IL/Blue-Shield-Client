@@ -1,4 +1,5 @@
 import { useState } from "react";
+import EmptyState from "components/EmptyState";
 import { useTheme } from "@mui/material/styles";
 import { useMostViewed } from "hooks/useDashboardData";
 import type { MostViewedItem } from "interfaces/dashboard";
@@ -31,7 +32,11 @@ const MostViewed = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
   const { startDate, endDate, keywords } = useDateRange();
-  const { data = [], isLoading } = useMostViewed({
+  const {
+    data = [],
+    isLoading,
+    isError,
+  } = useMostViewed({
     startDate,
     endDate,
     keywords,
@@ -111,110 +116,118 @@ const MostViewed = () => {
           },
         }}
       >
-        {isLoading
-          ? Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton
-                key={i}
-                variant="rectangular"
-                height={72}
-                sx={{ borderRadius: 2 }}
-              />
-            ))
-          : data.map((post, i) => (
+        {isLoading ? (
+          Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton
+              key={i}
+              variant="rectangular"
+              height={72}
+              sx={{ borderRadius: 2 }}
+            />
+          ))
+        ) : isError ? (
+          <EmptyState
+            title="Unable to load posts"
+            description="Try refreshing the dashboard."
+            minHeight={260}
+          />
+        ) : (
+          data.map((post, i) => (
+            <Box
+              key={post.handle + i}
+              onClick={() => setSelectedPost(toModalData(post))}
+              sx={{
+                borderRadius: "12px",
+                border: `1px solid ${theme.palette.divider}`,
+                backgroundColor: theme.palette.background.paper,
+                px: 2,
+                py: 1.5,
+                transition: "background-color 0.15s",
+                cursor: "pointer",
+                "&:hover": { backgroundColor: theme.palette.action.hover },
+                minWidth: 0,
+                overflow: "hidden",
+                flexShrink: 0,
+              }}
+            >
               <Box
-                key={post.handle + i}
-                onClick={() => setSelectedPost(toModalData(post))}
                 sx={{
-                  borderRadius: "12px",
-                  border: `1px solid ${theme.palette.divider}`,
-                  backgroundColor: theme.palette.background.paper,
-                  px: 2,
-                  py: 1.5,
-                  transition: "background-color 0.15s",
-                  cursor: "pointer",
-                  "&:hover": { backgroundColor: theme.palette.action.hover },
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 1,
                   minWidth: 0,
-                  overflow: "hidden",
-                  flexShrink: 0,
                 }}
               >
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 1,
-                    minWidth: 0,
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      fontSize: "14px",
-                      fontWeight: 600,
-                      color: theme.palette.text.primary,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {post.source}
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontSize: "12px",
-                      fontWeight: 500,
-                      color: theme.palette.primary.main,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {formatNumber(post.popularity ?? post.views)} popularity
-                  </Typography>
-                </Box>
                 <Typography
                   sx={{
-                    mt: 0.5,
-                    fontSize: "12px",
-                    color: theme.palette.text.secondary,
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    color: theme.palette.text.primary,
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
                   }}
                 >
-                  "{post.preview}"
+                  {post.source}
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: "12px",
+                    fontWeight: 500,
+                    color: theme.palette.primary.main,
+                    flexShrink: 0,
+                  }}
+                >
+                  {formatNumber(post.popularity ?? post.views)} popularity
+                </Typography>
+              </Box>
+              <Typography
+                sx={{
+                  mt: 0.5,
+                  fontSize: "12px",
+                  color: theme.palette.text.secondary,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                "{post.preview}"
+              </Typography>
+              <Box
+                sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}
+              >
+                <Typography
+                  sx={{
+                    fontSize: "12px",
+                    color: theme.palette.text.secondary,
+                  }}
+                >
+                  {formatDateShort(post.date)}
                 </Typography>
                 <Box
-                  sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}
+                  sx={{
+                    borderRadius: "999px",
+                    backgroundColor: isDark
+                      ? "rgba(59,130,246,0.15)"
+                      : "#EFF6FF",
+                    color: theme.palette.primary.main,
+                    px: 1,
+                    py: 0.25,
+                    fontSize: "12px",
+                    fontWeight: 500,
+                    maxWidth: 160,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
                 >
-                  <Typography
-                    sx={{
-                      fontSize: "12px",
-                      color: theme.palette.text.secondary,
-                    }}
-                  >
-                    {formatDateShort(post.date)}
-                  </Typography>
-                  <Box
-                    sx={{
-                      borderRadius: "999px",
-                      backgroundColor: isDark
-                        ? "rgba(59,130,246,0.15)"
-                        : "#EFF6FF",
-                      color: theme.palette.primary.main,
-                      px: 1,
-                      py: 0.25,
-                      fontSize: "12px",
-                      fontWeight: 500,
-                      maxWidth: 160,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {post.category}
-                  </Box>
+                  {post.category}
                 </Box>
               </Box>
-            ))}
+            </Box>
+          ))
+        )}
       </Box>
 
       <PostDetailModal

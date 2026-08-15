@@ -142,33 +142,44 @@ const FreeSearchPage = () => {
     return LANGUAGE_OPTIONS;
   }, [languagesData]);
 
-  const { data: semanticData, isLoading: semanticLoading } = useSemanticSearch(
+  const {
+    data: semanticData,
+    isLoading: semanticLoading,
+    isError: semanticIsError,
+    refetch: refetchSemantic,
+    isFetching: semanticIsFetching,
+  } = useSemanticSearch(
     semanticQuery,
     page,
     PAGE_SIZE,
     isSemanticMode && !!semanticQuery
   );
 
-  const { data, isLoading, isError, refetch, isFetching } = usePostSearch({
-    page,
-    pageSize: PAGE_SIZE,
-    search: applied.search || undefined,
-    author: applied.sources.length ? applied.sources.join(",") : undefined,
-    keywords: applied.keywords.length ? applied.keywords.join(",") : undefined,
-    country: applied.countries.length ? applied.countries.join(",") : undefined,
-    language: applied.languages.length
-      ? applied.languages.join(",")
-      : undefined,
-    sentiment: applied.sentiments.length
-      ? applied.sentiments.join(",")
-      : undefined,
-    minScore: applied.minScore,
-    maxScore: applied.maxScore,
-    startDate: applied.startDate || undefined,
-    endDate: applied.endDate || undefined,
-    sortBy,
-    sortOrder,
-  });
+  const { data, isLoading, isError, refetch, isFetching } = usePostSearch(
+    {
+      page,
+      pageSize: PAGE_SIZE,
+      search: applied.search || undefined,
+      author: applied.sources.length ? applied.sources.join(",") : undefined,
+      keywords: applied.keywords.length ? applied.keywords.join(",") : undefined,
+      country: applied.countries.length
+        ? applied.countries.join(",")
+        : undefined,
+      language: applied.languages.length
+        ? applied.languages.join(",")
+        : undefined,
+      sentiment: applied.sentiments.length
+        ? applied.sentiments.join(",")
+        : undefined,
+      minScore: applied.minScore,
+      maxScore: applied.maxScore,
+      startDate: applied.startDate || undefined,
+      endDate: applied.endDate || undefined,
+      sortBy,
+      sortOrder,
+    },
+    !isSemanticMode
+  );
 
   const handlePresetChange = (preset: RangePreset) => {
     setDatePreset(preset);
@@ -216,8 +227,23 @@ const FreeSearchPage = () => {
     setPage(1);
   };
 
+  const handleSemanticSearch = () => {
+    setSemanticQuery(semanticInput.trim());
+    setPage(1);
+  };
+
+  const handleSubmit = () => {
+    if (isSemanticMode) {
+      handleSemanticSearch();
+    } else {
+      handleSearch();
+    }
+  };
+
   const handleClear = () => {
     setSearchText("");
+    setSemanticInput("");
+    setSemanticQuery("");
     setSelectedSources([]);
     setSelectedKeywords([]);
     setSelectedCountries([]);
@@ -243,6 +269,12 @@ const FreeSearchPage = () => {
   };
 
   const activeData = isSemanticMode ? semanticData : data;
+  const activeIsLoading = isSemanticMode ? semanticLoading : isLoading;
+  const activeIsError = isSemanticMode ? semanticIsError : isError;
+  const activeIsFetching = isSemanticMode
+    ? semanticIsFetching
+    : isFetching;
+  const refetchActive = isSemanticMode ? refetchSemantic : refetch;
   const totalPages = activeData?.totalPages || 1;
   const pageNumbers = useMemo(
     () => buildPageNumbers(page, totalPages),
@@ -361,11 +393,7 @@ const FreeSearchPage = () => {
                 }
                 onKeyDown={e => {
                   if (e.key === "Enter") {
-                    if (isSemanticMode) {
-                      setSemanticQuery(semanticInput.trim());
-                    } else {
-                      handleSearch();
-                    }
+                    handleSubmit();
                   }
                 }}
                 placeholder={
@@ -719,7 +747,7 @@ const FreeSearchPage = () => {
               }}
             >
               <Button
-                onClick={handleSearch}
+                onClick={handleSubmit}
                 variant="contained"
                 sx={{
                   height: 36,
@@ -880,7 +908,7 @@ const FreeSearchPage = () => {
             <Box>Keywords</Box>
           </Box>
 
-          {(isSemanticMode ? semanticLoading : isLoading) ? (
+          {activeIsLoading ? (
             <Box
               sx={{
                 display: "flex",
@@ -896,7 +924,7 @@ const FreeSearchPage = () => {
                 sx={{ color: theme.palette.primary.main }}
               />
             </Box>
-          ) : isError ? (
+          ) : activeIsError ? (
             <Box
               sx={{
                 display: "flex",
@@ -910,19 +938,22 @@ const FreeSearchPage = () => {
               <Typography sx={{ color: theme.palette.error.main, mb: 1 }}>
                 Failed to load posts.
               </Typography>
-              <Button variant="outlined" size="small" onClick={() => refetch()}>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => refetchActive()}
+              >
                 Retry
               </Button>
             </Box>
-          ) : (isSemanticMode ? semanticData : data) &&
-            (isSemanticMode ? semanticData : data)!.items.length > 0 ? (
+          ) : activeData && activeData.items.length > 0 ? (
             <Box
               sx={{
-                opacity: isFetching ? 0.6 : 1,
+                opacity: activeIsFetching ? 0.6 : 1,
                 transition: "opacity 0.15s",
               }}
             >
-              {((isSemanticMode ? semanticData : data)?.items ?? []).map(
+              {(activeData?.items ?? []).map(
                 (post: PostItem) => (
                   <Box
                     key={post.postId}

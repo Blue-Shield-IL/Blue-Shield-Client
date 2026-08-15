@@ -1,3 +1,4 @@
+import EmptyState from "components/EmptyState";
 import useCardStyles from "hooks/useCardStyles";
 import { formatNumber } from "../dashboardHelpers";
 import { Box, Skeleton, Typography } from "@mui/material";
@@ -57,12 +58,32 @@ const MiniStat = ({
 
 const ReachSummary = () => {
   const { startDate, endDate, preset, keywords } = useDateRange();
-  const { data, isLoading } = useDashboardStats({
+  const { data, isLoading, isError } = useDashboardStats({
     startDate,
     endDate,
     keywords,
   });
   const styles = useCardStyles();
+
+  if (isError) {
+    return (
+      <Box
+        sx={{
+          borderRadius: "24px",
+          border: styles.card.border,
+          backgroundColor: styles.card.backgroundColor,
+          p: { xs: 3, sm: 4 },
+          boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+        }}
+      >
+        <EmptyState
+          title="Unable to load dashboard"
+          description="Try refreshing the dashboard."
+          minHeight={140}
+        />
+      </Box>
+    );
+  }
 
   return (
     <Box

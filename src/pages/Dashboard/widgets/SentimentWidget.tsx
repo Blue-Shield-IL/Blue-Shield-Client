@@ -8,6 +8,7 @@ import {
   Tooltip,
 } from "recharts";
 
+import EmptyState from "components/EmptyState";
 import useCardStyles from "hooks/useCardStyles";
 import { useSentimentDistribution } from "hooks/useDashboardData";
 import useDateRange from "contexts/dateRangeContext/useDateRange";
@@ -21,7 +22,7 @@ const SENTIMENT_COLORS: Record<string, string> = {
 
 const SentimentWidget = () => {
   const { startDate, endDate, keywords } = useDateRange();
-  const { data, isLoading } = useSentimentDistribution({
+  const { data, isLoading, isError } = useSentimentDistribution({
     startDate,
     endDate,
     keywords,
@@ -58,6 +59,12 @@ const SentimentWidget = () => {
             variant="rectangular"
             height="100%"
             sx={{ borderRadius: 2 }}
+          />
+        ) : isError ? (
+          <EmptyState
+            title="Unable to load sentiment"
+            description="Try refreshing the dashboard."
+            minHeight="100%"
           />
         ) : (
           <ResponsiveContainer width="100%" height="100%">

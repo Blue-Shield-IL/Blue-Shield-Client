@@ -1,3 +1,4 @@
+import EmptyState from "components/EmptyState";
 import { useTheme } from "@mui/material/styles";
 import { formatNumber } from "../dashboardHelpers";
 import { useTopSources } from "hooks/useDashboardData";
@@ -8,7 +9,11 @@ const TopSources = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
   const { startDate, endDate, keywords } = useDateRange();
-  const { data = [], isLoading } = useTopSources({
+  const {
+    data = [],
+    isLoading,
+    isError,
+  } = useTopSources({
     startDate,
     endDate,
     keywords,
@@ -42,99 +47,105 @@ const TopSources = () => {
       </Typography>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 2 }}>
-        {isLoading
-          ? Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton
-                key={i}
-                variant="rectangular"
-                height={52}
-                sx={{ borderRadius: 2 }}
-              />
-            ))
-          : data.map(source => (
+        {isLoading ? (
+          Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton
+              key={i}
+              variant="rectangular"
+              height={52}
+              sx={{ borderRadius: 2 }}
+            />
+          ))
+        ) : isError ? (
+          <EmptyState
+            title="Unable to load sources"
+            description="Try refreshing the dashboard."
+            minHeight={260}
+          />
+        ) : (
+          data.map(source => (
+            <Box
+              key={source.handle + source.rank}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                borderRadius: "12px",
+                border: "1px solid transparent",
+                backgroundColor: theme.palette.action.hover,
+                px: 1.5,
+                py: 1.25,
+                transition: "all 0.15s",
+                "&:hover": {
+                  borderColor: theme.palette.divider,
+                  backgroundColor: theme.palette.action.selected,
+                },
+              }}
+            >
               <Box
-                key={source.handle + source.rank}
                 sx={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: "50%",
+                  backgroundColor: isDark ? "rgba(59,130,246,0.15)" : "#EFF6FF",
+                  color: theme.palette.primary.main,
                   display: "flex",
                   alignItems: "center",
-                  gap: 1.5,
-                  borderRadius: "12px",
-                  border: "1px solid transparent",
-                  backgroundColor: theme.palette.action.hover,
-                  px: 1.5,
-                  py: 1.25,
-                  transition: "all 0.15s",
-                  "&:hover": {
-                    borderColor: theme.palette.divider,
-                    backgroundColor: theme.palette.action.selected,
-                  },
+                  justifyContent: "center",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  flexShrink: 0,
                 }}
               >
-                <Box
+                {source.rank}
+              </Box>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
                   sx={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: "50%",
-                    backgroundColor: isDark
-                      ? "rgba(59,130,246,0.15)"
-                      : "#EFF6FF",
-                    color: theme.palette.primary.main,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "12px",
-                    fontWeight: 600,
-                    flexShrink: 0,
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    color: theme.palette.text.primary,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
                   }}
                 >
-                  {source.rank}
-                </Box>
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography
-                    sx={{
-                      fontSize: "14px",
-                      fontWeight: 500,
-                      color: theme.palette.text.primary,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {source.name}
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontSize: "12px",
-                      color: theme.palette.text.secondary,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {source.handle}
-                  </Typography>
-                </Box>
-                <Box sx={{ textAlign: "right" }}>
-                  <Typography
-                    sx={{
-                      fontSize: "12px",
-                      fontWeight: 500,
-                      color: theme.palette.text.primary,
-                    }}
-                  >
-                    {formatNumber(source.posts)} Posts
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontSize: "12px",
-                      color: theme.palette.text.secondary,
-                    }}
-                  >
-                    {formatNumber(source.views)} Views
-                  </Typography>
-                </Box>
+                  {source.name}
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: "12px",
+                    color: theme.palette.text.secondary,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {source.handle}
+                </Typography>
               </Box>
-            ))}
+              <Box sx={{ textAlign: "right" }}>
+                <Typography
+                  sx={{
+                    fontSize: "12px",
+                    fontWeight: 500,
+                    color: theme.palette.text.primary,
+                  }}
+                >
+                  {formatNumber(source.posts)} Posts
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: "12px",
+                    color: theme.palette.text.secondary,
+                  }}
+                >
+                  {formatNumber(source.views)} Views
+                </Typography>
+              </Box>
+            </Box>
+          ))
+        )}
       </Box>
     </Box>
   );
