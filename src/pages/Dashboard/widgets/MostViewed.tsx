@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Box, IconButton, Skeleton, Tooltip, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { useMostViewed } from "hooks/useDashboardData";
+import type { MostViewedItem } from "interfaces/dashboard";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import useDateRange from "contexts/dateRangeContext/useDateRange";
 import { formatDateShort, formatNumber } from "../dashboardHelpers";
-import type { MostViewedItem } from "interfaces/dashboard";
 import PostDetailModal from "pages/FreeSearch/components/PostDetailModal";
+import { Box, IconButton, Skeleton, Tooltip, Typography } from "@mui/material";
 import type { PostModalData } from "pages/FreeSearch/components/PostDetailModal";
 
 const toModalData = (post: MostViewedItem): PostModalData => ({
@@ -31,7 +31,12 @@ const MostViewed = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
   const { startDate, endDate, keywords } = useDateRange();
-  const { data = [], isLoading } = useMostViewed({ startDate, endDate, keywords, limit: 5 });
+  const { data = [], isLoading } = useMostViewed({
+    startDate,
+    endDate,
+    keywords,
+    limit: 5,
+  });
   const [selectedPost, setSelectedPost] = useState<PostModalData | null>(null);
 
   return (
@@ -45,17 +50,41 @@ const MostViewed = () => {
         overflow: "hidden",
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
         <Box>
-          <Typography sx={{ fontSize: "14px", fontWeight: 600, color: theme.palette.text.primary }}>
+          <Typography
+            sx={{
+              fontSize: "14px",
+              fontWeight: 600,
+              color: theme.palette.text.primary,
+            }}
+          >
             Most Popular Posts
           </Typography>
-          <Typography sx={{ fontSize: "12px", color: theme.palette.text.secondary, mt: 0.25 }}>
+          <Typography
+            sx={{
+              fontSize: "12px",
+              color: theme.palette.text.secondary,
+              mt: 0.25,
+            }}
+          >
             Top 5 posts by popularity
           </Typography>
         </Box>
-        <Tooltip title="Popularity = views × 0.5 + likes × 0.3 + shares × 0.2" arrow>
-          <IconButton size="small" sx={{ color: theme.palette.text.secondary, width: 28, height: 28 }}>
+        <Tooltip
+          title="Popularity = views × 0.5 + likes × 0.3 + shares × 0.2"
+          arrow
+        >
+          <IconButton
+            size="small"
+            sx={{ color: theme.palette.text.secondary, width: 28, height: 28 }}
+          >
             <InfoOutlinedIcon sx={{ fontSize: 16 }} />
           </IconButton>
         </Tooltip>
@@ -84,7 +113,12 @@ const MostViewed = () => {
       >
         {isLoading
           ? Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} variant="rectangular" height={72} sx={{ borderRadius: 2 }} />
+              <Skeleton
+                key={i}
+                variant="rectangular"
+                height={72}
+                sx={{ borderRadius: 2 }}
+              />
             ))
           : data.map((post, i) => (
               <Box
@@ -148,14 +182,23 @@ const MostViewed = () => {
                 >
                   "{post.preview}"
                 </Typography>
-                <Box sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}>
-                  <Typography sx={{ fontSize: "12px", color: theme.palette.text.secondary }}>
+                <Box
+                  sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <Typography
+                    sx={{
+                      fontSize: "12px",
+                      color: theme.palette.text.secondary,
+                    }}
+                  >
                     {formatDateShort(post.date)}
                   </Typography>
                   <Box
                     sx={{
                       borderRadius: "999px",
-                      backgroundColor: isDark ? "rgba(59,130,246,0.15)" : "#EFF6FF",
+                      backgroundColor: isDark
+                        ? "rgba(59,130,246,0.15)"
+                        : "#EFF6FF",
                       color: theme.palette.primary.main,
                       px: 1,
                       py: 0.25,

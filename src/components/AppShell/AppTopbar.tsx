@@ -1,12 +1,28 @@
 import type { ReactNode } from "react";
-import { Avatar, Box, IconButton, Tooltip, Typography, useTheme } from "@mui/material";
 import { ROUTES } from "constants/routes";
-import { useNavigate } from "react-router-dom";
 import useAuth from "contexts/authContext";
+import { useNavigate } from "react-router-dom";
 import useThemeMode from "contexts/themeContext/useThemeMode";
+import {
+  Avatar,
+  Box,
+  IconButton,
+  Tooltip,
+  Typography,
+  useTheme,
+} from "@mui/material";
 
 const SunIcon = () => (
-  <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width={18}
+    height={18}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <circle cx="12" cy="12" r="5" />
     <line x1="12" y1="1" x2="12" y2="3" />
     <line x1="12" y1="21" x2="12" y2="23" />
@@ -20,7 +36,16 @@ const SunIcon = () => (
 );
 
 const MoonIcon = () => (
-  <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width={18}
+    height={18}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
   </svg>
 );
@@ -47,9 +72,8 @@ const AppTopbar = ({ children }: { children?: ReactNode }) => {
         px: 3,
         py: 1,
         borderBottom: `1px solid ${theme.palette.divider}`,
-        backgroundColor: mode === "dark"
-          ? "rgba(15,23,42,0.85)"
-          : "rgba(255,255,255,0.85)",
+        backgroundColor:
+          mode === "dark" ? "rgba(15,23,42,0.85)" : "rgba(255,255,255,0.85)",
         backdropFilter: "blur(8px)",
       }}
     >
@@ -118,10 +142,22 @@ const AppTopbar = ({ children }: { children?: ReactNode }) => {
             </Box>
           )}
           <Box sx={{ display: { xs: "none", sm: "block" }, lineHeight: 1.2 }}>
-            <Typography sx={{ fontSize: "14px", fontWeight: 600, color: theme.palette.text.primary }}>
+            <Typography
+              sx={{
+                fontSize: "14px",
+                fontWeight: 600,
+                color: theme.palette.text.primary,
+              }}
+            >
               {displayName}
             </Typography>
-            <Typography sx={{ fontSize: "12px", color: theme.palette.text.secondary, textTransform: "capitalize" }}>
+            <Typography
+              sx={{
+                fontSize: "12px",
+                color: theme.palette.text.secondary,
+                textTransform: "capitalize",
+              }}
+            >
               {user?.role?.replace("-", " ") ?? "Analyst"}
             </Typography>
           </Box>

@@ -1,8 +1,8 @@
+import { fonts } from "constants/styles";
 import { CssBaseline } from "@mui/material";
 import type { PropsWithChildren } from "react";
-import { fonts } from "constants/styles";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
 import useThemeMode from "contexts/themeContext/useThemeMode";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 const baseTypography = {
   fontFamily: `${fonts.main}, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,

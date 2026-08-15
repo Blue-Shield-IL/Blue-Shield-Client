@@ -1,4 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useTheme } from "@mui/material/styles";
+import { useQuery } from "@tanstack/react-query";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import {
   Alert,
   Avatar,
@@ -17,13 +21,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-import CameraAltIcon from "@mui/icons-material/CameraAlt";
-import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 
-import AppShell from "components/AppShell";
 import { ROUTES } from "constants/routes";
+import AppShell from "components/AppShell";
 import useAuth from "contexts/authContext";
 import * as authService from "services/authService";
 import * as keywordsService from "services/keywordsService";
@@ -56,10 +56,18 @@ const SectionCard = ({
         p: 3,
       }}
     >
-      <Typography sx={{ fontSize: "16px", fontWeight: 600, color: theme.palette.text.primary }}>
+      <Typography
+        sx={{
+          fontSize: "16px",
+          fontWeight: 600,
+          color: theme.palette.text.primary,
+        }}
+      >
         {title}
       </Typography>
-      <Typography sx={{ fontSize: "13px", color: theme.palette.text.secondary, mb: 2.5 }}>
+      <Typography
+        sx={{ fontSize: "13px", color: theme.palette.text.secondary, mb: 2.5 }}
+      >
         {description}
       </Typography>
       {children}
@@ -75,29 +83,37 @@ const SettingsPage = () => {
 
   const [fullName, setFullName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
-  const [role, setRole] = useState<string>(user?.role ?? localStorage.getItem(ROLE_STORAGE_KEY) ?? "analyst");
+  const [role, setRole] = useState<string>(
+    user?.role ?? localStorage.getItem(ROLE_STORAGE_KEY) ?? "analyst"
+  );
   const [isDeleting, setIsDeleting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [profileSaving, setProfileSaving] = useState(false);
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [pendingPic, setPendingPic] = useState<File | null>(null);
-  const [pendingPicPreview, setPendingPicPreview] = useState<string | null>(null);
+  const [pendingPicPreview, setPendingPicPreview] = useState<string | null>(
+    null
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const picUploading = profileSaving && pendingPic !== null;
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: "success" | "error" }>({ open: false, message: "", severity: "success" });
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error";
+  }>({ open: false, message: "", severity: "success" });
 
   const profileDirty =
     fullName !== (user?.name ?? "") ||
     email !== (user?.email ?? "") ||
     pendingPic !== null;
 
-  useEffect(() => {
-    if (user?.role) setRole(user.role);
-  }, [user?.role]);
+  // Sync role from user when it arrives (without useEffect + setState)
+  if (user?.role && user.role !== role) {
+    setRole(user.role);
+  }
 
   const handleRoleChange = async (value: string) => {
     setRole(value);
@@ -178,6 +194,7 @@ const SettingsPage = () => {
     setIsDeleting(true);
     try {
       await authService.deleteAccount();
+      window.localStorage.clear();
       await logout();
       navigate(ROUTES.LOGIN);
     } catch {
@@ -194,7 +211,10 @@ const SettingsPage = () => {
       maxWidth={820}
     >
       {/* Profile */}
-      <SectionCard title="Profile" description="Update your personal information.">
+      <SectionCard
+        title="Profile"
+        description="Update your personal information."
+      >
         <Box sx={{ mb: 3 }}>
           <input
             ref={fileInputRef}
@@ -215,7 +235,11 @@ const SettingsPage = () => {
             }}
           >
             {(pendingPicPreview ?? user?.profilePicUrl) ? (
-              <Avatar src={pendingPicPreview ?? user?.profilePicUrl ?? undefined} alt={user?.name ?? user?.email ?? "User"} sx={{ width: 72, height: 72 }} />
+              <Avatar
+                src={pendingPicPreview ?? user?.profilePicUrl ?? undefined}
+                alt={user?.name ?? user?.email ?? "User"}
+                sx={{ width: 72, height: 72 }}
+              />
             ) : (
               <Box
                 sx={{
@@ -267,7 +291,7 @@ const SettingsPage = () => {
           <TextField
             label="Full Name"
             value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            onChange={e => setFullName(e.target.value)}
             size="small"
             fullWidth
             sx={inputSx}
@@ -276,7 +300,7 @@ const SettingsPage = () => {
             label="Email"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={e => setEmail(e.target.value)}
             size="small"
             fullWidth
             sx={inputSx}
@@ -318,7 +342,7 @@ const SettingsPage = () => {
               type="password"
               size="small"
               value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
+              onChange={e => setCurrentPassword(e.target.value)}
               sx={inputSx}
             />
             <TextField
@@ -326,7 +350,7 @@ const SettingsPage = () => {
               type="password"
               size="small"
               value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
+              onChange={e => setNewPassword(e.target.value)}
               sx={inputSx}
             />
             <TextField
@@ -334,7 +358,7 @@ const SettingsPage = () => {
               type="password"
               size="small"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={e => setConfirmPassword(e.target.value)}
               sx={inputSx}
             />
           </Box>
@@ -359,8 +383,11 @@ const SettingsPage = () => {
           title="Security"
           description="Your account is linked to Google."
         >
-          <Typography sx={{ fontSize: "14px", color: theme.palette.text.secondary }}>
-            You signed in with Google. Password management is handled through your Google account.
+          <Typography
+            sx={{ fontSize: "14px", color: theme.palette.text.secondary }}
+          >
+            You signed in with Google. Password management is handled through
+            your Google account.
           </Typography>
         </SectionCard>
       )}
@@ -380,20 +407,28 @@ const SettingsPage = () => {
           }}
         >
           <Box>
-            <Typography sx={{ fontSize: "12px", color: theme.palette.text.secondary }}>
+            <Typography
+              sx={{ fontSize: "12px", color: theme.palette.text.secondary }}
+            >
               Current role
             </Typography>
-            <Typography sx={{ fontSize: "14px", fontWeight: 600, color: theme.palette.text.primary }}>
-              {ROLES.find((r) => r.id === role)?.title ?? "Analyst"}
+            <Typography
+              sx={{
+                fontSize: "14px",
+                fontWeight: 600,
+                color: theme.palette.text.primary,
+              }}
+            >
+              {ROLES.find(r => r.id === role)?.title ?? "Analyst"}
             </Typography>
           </Box>
           <Select
             value={role}
-            onChange={(e) => handleRoleChange(e.target.value)}
+            onChange={e => handleRoleChange(e.target.value)}
             size="small"
             sx={{ minWidth: 200, borderRadius: "10px" }}
           >
-            {ROLES.map((r) => (
+            {ROLES.map(r => (
               <MenuItem key={r.id} value={r.id}>
                 {r.title}
               </MenuItem>
@@ -403,17 +438,14 @@ const SettingsPage = () => {
       </SectionCard>
 
       {/* Keywords */}
-      <SectionCard
-        title="My Keywords"
-        description="Topics you are monitoring."
-      >
+      <SectionCard title="My Keywords" description="Topics you are monitoring.">
         {keywordsLoading ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 1 }}>
             <CircularProgress size={22} sx={{ color: "#2563EB" }} />
           </Box>
         ) : keywords.length > 0 ? (
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-            {keywords.map((keyword) => (
+            {keywords.map(keyword => (
               <Chip
                 key={keyword.id}
                 label={keyword.word}
@@ -426,8 +458,11 @@ const SettingsPage = () => {
             ))}
           </Box>
         ) : (
-          <Typography sx={{ fontSize: "14px", color: theme.palette.text.secondary }}>
-            No keywords selected yet. Complete onboarding to set your preferences.
+          <Typography
+            sx={{ fontSize: "14px", color: theme.palette.text.secondary }}
+          >
+            No keywords selected yet. Complete onboarding to set your
+            preferences.
           </Typography>
         )}
         <Button
@@ -485,11 +520,11 @@ const SettingsPage = () => {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
-        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        onClose={() => setSnackbar(s => ({ ...s, open: false }))}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert
-          onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+          onClose={() => setSnackbar(s => ({ ...s, open: false }))}
           severity={snackbar.severity}
           variant="filled"
           sx={{ borderRadius: "10px", fontWeight: 500 }}

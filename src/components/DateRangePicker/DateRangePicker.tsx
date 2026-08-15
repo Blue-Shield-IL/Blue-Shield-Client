@@ -1,8 +1,8 @@
+import type { Theme } from "@mui/material/styles";
 import { useCallback, useMemo, useState } from "react";
-import { Box, IconButton, Popover, Typography, useTheme } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import type { Theme } from "@mui/material/styles";
+import { Box, IconButton, Popover, Typography, useTheme } from "@mui/material";
 
 export type RangePreset =
   | "All Time"
@@ -65,8 +65,7 @@ const MiniCalendar = ({
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const cells: (Date | null)[] = [];
     for (let i = 0; i < firstDay; i++) cells.push(null);
-    for (let d = 1; d <= daysInMonth; d++)
-      cells.push(new Date(year, month, d));
+    for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(year, month, d));
     return cells;
   }, [year, month]);
 
@@ -119,7 +118,7 @@ const MiniCalendar = ({
           mb: 0.5,
         }}
       >
-        {DAYS.map((d) => (
+        {DAYS.map(d => (
           <Typography
             key={d}
             sx={{
@@ -227,11 +226,11 @@ const DateRangePicker = ({
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  const [pickStart, setPickStart] = useState<Date | null>(
-    () => (startDate ? new Date(startDate) : new Date()),
+  const [pickStart, setPickStart] = useState<Date | null>(() =>
+    startDate ? new Date(startDate) : new Date()
   );
-  const [pickEnd, setPickEnd] = useState<Date | null>(
-    () => (endDate ? new Date(endDate) : new Date()),
+  const [pickEnd, setPickEnd] = useState<Date | null>(() =>
+    endDate ? new Date(endDate) : new Date()
   );
   const [pickingStart, setPickingStart] = useState(true);
 
@@ -269,7 +268,7 @@ const DateRangePicker = ({
         setPickingStart(true);
       }
     },
-    [pickingStart, pickStart],
+    [pickingStart, pickStart]
   );
 
   const handleApply = () => {
@@ -320,12 +319,10 @@ const DateRangePicker = ({
         >
           Range
         </Typography>
-        {PRESETS.map((range) => (
+        {PRESETS.map(range => (
           <Box
             key={range}
-            onClick={(e) =>
-              handleClick(range, e.currentTarget as HTMLElement)
-            }
+            onClick={e => handleClick(range, e.currentTarget as HTMLElement)}
             sx={{
               borderRadius: "999px",
               px: 1.5,
@@ -533,8 +530,7 @@ const DateRangePicker = ({
               py: 1,
               fontSize: "13px",
               fontWeight: 600,
-              cursor:
-                pickStart && pickEnd ? "pointer" : "not-allowed",
+              cursor: pickStart && pickEnd ? "pointer" : "not-allowed",
               textAlign: "center",
               color: "#FFFFFF",
               backgroundColor:

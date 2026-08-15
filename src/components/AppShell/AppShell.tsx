@@ -1,8 +1,8 @@
-import { useEffect, useRef, type ReactNode } from "react";
-import { Box, Typography, useTheme } from "@mui/material";
+import AppTopbar from "./AppTopbar";
 import { useLocation } from "react-router-dom";
 import AppSidebar, { SIDEBAR_WIDTH } from "./AppSidebar";
-import AppTopbar from "./AppTopbar";
+import { useEffect, useRef, type ReactNode } from "react";
+import { Box, Typography, useTheme } from "@mui/material";
 
 interface AppShellProps {
   title?: string;
@@ -31,7 +31,14 @@ const AppShell = ({
   }, [pathname]);
 
   return (
-    <Box sx={{ height: "100vh", backgroundColor: theme.palette.background.default, width: "100%", overflow: "hidden" }}>
+    <Box
+      sx={{
+        height: "100vh",
+        backgroundColor: theme.palette.background.default,
+        width: "100%",
+        overflow: "hidden",
+      }}
+    >
       <AppSidebar />
       <Box
         ref={scrollRef}
@@ -61,12 +68,22 @@ const AppShell = ({
           {title && (
             <Box>
               <Typography
-                sx={{ fontSize: "24px", fontWeight: 700, color: theme.palette.text.primary }}
+                sx={{
+                  fontSize: "24px",
+                  fontWeight: 700,
+                  color: theme.palette.text.primary,
+                }}
               >
                 {title}
               </Typography>
               {subtitle && (
-                <Typography sx={{ mt: 0.5, fontSize: "14px", color: theme.palette.text.secondary }}>
+                <Typography
+                  sx={{
+                    mt: 0.5,
+                    fontSize: "14px",
+                    color: theme.palette.text.secondary,
+                  }}
+                >
                   {subtitle}
                 </Typography>
               )}

@@ -8,8 +8,8 @@ import {
   Tooltip,
 } from "recharts";
 
-import { useSentimentDistribution } from "hooks/useDashboardData";
 import useCardStyles from "hooks/useCardStyles";
+import { useSentimentDistribution } from "hooks/useDashboardData";
 import useDateRange from "contexts/dateRangeContext/useDateRange";
 
 const SENTIMENT_COLORS: Record<string, string> = {
@@ -21,7 +21,11 @@ const SENTIMENT_COLORS: Record<string, string> = {
 
 const SentimentWidget = () => {
   const { startDate, endDate, keywords } = useDateRange();
-  const { data, isLoading } = useSentimentDistribution({ startDate, endDate, keywords });
+  const { data, isLoading } = useSentimentDistribution({
+    startDate,
+    endDate,
+    keywords,
+  });
   const styles = useCardStyles();
 
   const total = data?.reduce((sum, d) => sum + d.count, 0) ?? 0;
@@ -67,7 +71,7 @@ const SentimentWidget = () => {
                 paddingAngle={2}
                 stroke="none"
               >
-                {(data ?? []).map((entry) => (
+                {(data ?? []).map(entry => (
                   <Cell
                     key={entry.sentiment}
                     fill={SENTIMENT_COLORS[entry.sentiment] ?? "#8884d8"}

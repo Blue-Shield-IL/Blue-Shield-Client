@@ -1,10 +1,10 @@
-import { Box, Skeleton, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { Box, Skeleton, Typography } from "@mui/material";
 
-import { useTopicBreakdown } from "hooks/useDashboardData";
 import useCardStyles from "hooks/useCardStyles";
-import useDateRange from "contexts/dateRangeContext/useDateRange";
 import { formatNumber } from "../dashboardHelpers";
+import { useTopicBreakdown } from "hooks/useDashboardData";
+import useDateRange from "contexts/dateRangeContext/useDateRange";
 
 const TOPIC_ICONS: Record<string, string> = {
   "Conspiracy Theories": "🕵️",
@@ -17,7 +17,11 @@ const TOPIC_ICONS: Record<string, string> = {
 const MyTopicsWidget = () => {
   const navigate = useNavigate();
   const { startDate, endDate, keywords } = useDateRange();
-  const { data, isLoading } = useTopicBreakdown({ startDate, endDate, keywords });
+  const { data, isLoading } = useTopicBreakdown({
+    startDate,
+    endDate,
+    keywords,
+  });
   const styles = useCardStyles();
 
   if (isLoading) {
@@ -75,7 +79,7 @@ const MyTopicsWidget = () => {
             key={topic.topic}
             onClick={() =>
               navigate(
-                `/search?keywords=${encodeURIComponent(topic.keywords.join(","))}`,
+                `/search?keywords=${encodeURIComponent(topic.keywords.join(","))}`
               )
             }
             sx={{

@@ -1,44 +1,48 @@
-import { colors } from "constants/styles";
+import { useTheme } from "@mui/material/styles";
 
-const styles = {
-  root: {
-    marginTop: "8px",
-  },
+const usePasswordValidatorStyles = () => {
+  const theme = useTheme();
 
-  barContainer: {
-    display: "flex",
-    gap: "4px",
-    marginBottom: "8px",
-  },
+  return {
+    root: {
+      marginTop: "8px",
+    },
 
-  strengthLabel: {
-    fontSize: "12px",
-    margin: "0 0 8px 0",
-    fontWeight: 500,
-  },
+    barContainer: {
+      display: "flex",
+      gap: "4px",
+      marginBottom: "8px",
+    },
 
-  ruleList: {
-    listStyle: "none",
-    padding: 0,
-    margin: 0,
-  },
+    strengthLabel: {
+      fontSize: "12px",
+      margin: "0 0 8px 0",
+      fontWeight: 500,
+    },
 
-  bar: (enable: boolean, strengthColor: string) => ({
-    flex: 1,
-    height: "4px",
-    borderRadius: "2px",
-    backgroundColor: enable ? strengthColor : colors.disabled,
-    transition: "background-color 0.2s",
-  }),
+    ruleList: {
+      listStyle: "none",
+      padding: 0,
+      margin: 0,
+    },
 
-  ruleItem: (passed: boolean) => ({
-    fontSize: "13px",
-    color: passed ? colors.successText : colors.errorText,
-    display: "flex",
-    alignItems: "center",
-    gap: "6px",
-    marginBottom: "4px",
-  }),
+    bar: (enable: boolean, strengthColor: string) => ({
+      flex: 1,
+      height: "4px",
+      borderRadius: "2px",
+      backgroundColor: enable ? strengthColor : theme.palette.divider,
+      transition: "background-color 0.2s",
+    }),
+
+    ruleItem: (passed: boolean) => ({
+      fontSize: "13px",
+      color: passed ? theme.palette.success.main : theme.palette.error.main,
+      display: "flex",
+      alignItems: "center",
+      gap: "6px",
+      marginBottom: "4px",
+    }),
+  };
 };
 
-export default styles;
+export default usePasswordValidatorStyles;

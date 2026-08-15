@@ -1,6 +1,6 @@
+import { useTheme } from "@mui/material/styles";
 import { useCallback, useRef, useState } from "react";
 import { Box, Skeleton, Typography } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import {
   ComposableMap,
   Geographies,
@@ -9,8 +9,8 @@ import {
   Sphere,
 } from "react-simple-maps";
 
-import { useGeographicDistribution } from "hooks/useDashboardData";
 import useDateRange from "contexts/dateRangeContext/useDateRange";
+import { useGeographicDistribution } from "hooks/useDashboardData";
 
 const GEO_URL =
   "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
@@ -41,9 +41,15 @@ const HotspotMap = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
   const { startDate, endDate, keywords } = useDateRange();
-  const { data = [], isLoading } = useGeographicDistribution({ startDate, endDate, keywords });
+  const { data = [], isLoading } = useGeographicDistribution({
+    startDate,
+    endDate,
+    keywords,
+  });
   const [hover, setHover] = useState<string | null>(null);
-  const [rotation, setRotation] = useState<[number, number, number]>([-10, -25, 0]);
+  const [rotation, setRotation] = useState<[number, number, number]>([
+    -10, -25, 0,
+  ]);
   const dragging = useRef(false);
   const lastPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
@@ -58,7 +64,7 @@ const HotspotMap = () => {
     const dx = e.clientX - lastPos.current.x;
     const dy = e.clientY - lastPos.current.y;
     lastPos.current = { x: e.clientX, y: e.clientY };
-    setRotation((prev) => {
+    setRotation(prev => {
       const sensitivity = 0.5;
       const newLon = prev[0] + dx * sensitivity;
       const newLat = Math.max(-90, Math.min(90, prev[1] - dy * sensitivity));
@@ -72,7 +78,7 @@ const HotspotMap = () => {
 
   const maxCount = data[0]?.count || 1;
   const weights = new Map<string, number>();
-  data.forEach((item) => {
+  data.forEach(item => {
     const mapName = NAME_ALIASES[item.country] || item.country;
     weights.set(mapName, item.count / maxCount);
   });
@@ -88,10 +94,18 @@ const HotspotMap = () => {
         overflow: "hidden",
       }}
     >
-      <Typography sx={{ fontSize: "14px", fontWeight: 600, color: theme.palette.text.primary }}>
+      <Typography
+        sx={{
+          fontSize: "14px",
+          fontWeight: 600,
+          color: theme.palette.text.primary,
+        }}
+      >
         Hotspot Countries
       </Typography>
-      <Typography sx={{ fontSize: "12px", color: theme.palette.text.secondary, mt: 0.25 }}>
+      <Typography
+        sx={{ fontSize: "12px", color: theme.palette.text.secondary, mt: 0.25 }}
+      >
         Countries shaded by volume of detected content
       </Typography>
 
@@ -131,7 +145,7 @@ const HotspotMap = () => {
             <Graticule stroke={theme.palette.divider} strokeWidth={0.4} />
             <Geographies geography={GEO_URL}>
               {({ geographies }) =>
-                geographies.map((geo) => {
+                geographies.map(geo => {
                   const name = geo.properties?.name as string;
                   const weight = weights.get(name);
                   return (
@@ -193,8 +207,11 @@ const HotspotMap = () => {
           gap: 2,
         }}
       >
-        {LEGEND.map((item) => (
-          <Box key={item.label} sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+        {LEGEND.map(item => (
+          <Box
+            key={item.label}
+            sx={{ display: "flex", alignItems: "center", gap: 0.75 }}
+          >
             <Box
               sx={{
                 width: 10,
@@ -203,7 +220,9 @@ const HotspotMap = () => {
                 backgroundColor: item.color,
               }}
             />
-            <Typography sx={{ fontSize: "12px", color: theme.palette.text.secondary }}>
+            <Typography
+              sx={{ fontSize: "12px", color: theme.palette.text.secondary }}
+            >
               {item.label}
             </Typography>
           </Box>
