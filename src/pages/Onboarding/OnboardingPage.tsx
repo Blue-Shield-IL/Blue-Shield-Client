@@ -114,7 +114,7 @@ const OnboardingPage = () => {
       const selectedRole = ROLES.find(r => r.id === role);
       const defaultNames = selectedRole?.defaultTopics ?? [];
       const matchedIds = topics
-        .filter(t => defaultNames.includes(t.name))
+        .filter(t => defaultNames.includes(t.id))
         .map(t => t.id);
       return matchedIds.length > 0 ? matchedIds : topics.map(t => t.id);
     }
