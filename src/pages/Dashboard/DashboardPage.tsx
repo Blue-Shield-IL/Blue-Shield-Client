@@ -3,6 +3,7 @@ import useAuth from "contexts/authContext";
 import HotspotMap from "./widgets/HotspotMap";
 import MostViewed from "./widgets/MostViewed";
 import TopSources from "./widgets/TopSources";
+import EmptyState from "components/EmptyState";
 import RangeFilter from "./widgets/RangeFilter";
 import TrendCharts from "./widgets/TrendCharts";
 import { useQuery } from "@tanstack/react-query";
@@ -10,13 +11,14 @@ import ReachSummary from "./widgets/ReachSummary";
 import MyTopicsWidget from "./widgets/MyTopicsWidget";
 import SentimentWidget from "./widgets/SentimentWidget";
 import { getMyKeywords } from "services/keywordsService";
+import { useDashboardStats } from "hooks/useDashboardData";
 import { getPanelOrder, type PanelId } from "./panelConfig";
 import TopKeywordsWidget from "./widgets/TopKeywordsWidget";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DateRangeProvider } from "contexts/dateRangeContext";
 import IhraCategoryWidget from "./widgets/IhraCategoryWidget";
 import useDateRange from "contexts/dateRangeContext/useDateRange";
-import { Box, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { Box, Button, ToggleButton, ToggleButtonGroup } from "@mui/material";
 
 const threeColGrid = {
   display: "grid",
@@ -47,15 +49,23 @@ const panelComponents: Record<PanelId, React.ReactNode> = {
 
 const DashboardContent = () => {
   const { user } = useAuth();
-  const { setKeywords } = useDateRange();
+  const { startDate, endDate, keywords, setKeywords } = useDateRange();
   const [viewMode, setViewMode] = useState<"all" | "myTopics">("myTopics");
   const initializedRef = useRef(false);
 
-  const { data: myKeywords } = useQuery({
+  const { data: myKeywords, isSuccess: myKeywordsLoaded } = useQuery({
     queryKey: ["keywords", "me"],
     queryFn: getMyKeywords,
     staleTime: 5 * 60 * 1000,
   });
+
+  const statsQuery = useDashboardStats({ startDate, endDate, keywords });
+  const hasNoConfiguredKeywords =
+    myKeywordsLoaded && (myKeywords?.length ?? 0) === 0;
+  const hasNoPosts =
+    statsQuery.isSuccess && Number(statsQuery.data.totalPosts) === 0;
+  const showMyTopicsEmptyState =
+    viewMode === "myTopics" && (hasNoConfiguredKeywords || hasNoPosts);
 
   const role = user?.role;
   const panelOrder = getPanelOrder(role ?? undefined);
@@ -116,7 +126,38 @@ const DashboardContent = () => {
       subtitle="Real-time monitoring of antisemitic content collected across sources."
       topbarContent={topbarContent}
     >
-      {panelOrder.map(id => panelComponents[id])}
+      {showMyTopicsEmptyState ? (
+        <Box
+          sx={{
+            minHeight: 360,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: "16px",
+            backgroundColor: "background.paper",
+            p: 3,
+          }}
+        >
+          <EmptyState
+            title="No My Topics results"
+            description="Switch to All Posts to explore the full dashboard."
+            minHeight={140}
+            illustrationSrc="/dashboard-empty-state.svg"
+            illustrationDarkSrc="/dashboard-empty-state-dark.svg"
+          />
+          <Button
+            variant="contained"
+            onClick={() => handleViewModeChange(null, "all")}
+          >
+            View All Posts
+          </Button>
+        </Box>
+      ) : (
+        panelOrder.map(id => panelComponents[id])
+      )}
     </AppShell>
   );
 };

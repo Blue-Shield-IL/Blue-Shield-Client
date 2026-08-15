@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import CheckIcon from "@mui/icons-material/Check";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+
 import {
   Box,
   Button,
@@ -60,11 +61,50 @@ const formatNumber = (n: number): string => {
   return n.toLocaleString();
 };
 
+const copyText = async (
+  text: string,
+  fallbackTextArea: HTMLTextAreaElement | null
+) => {
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  if (!fallbackTextArea) {
+    throw new Error("Clipboard fallback is unavailable");
+  }
+
+  const previouslyFocused =
+    document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+
+  fallbackTextArea.value = text;
+  fallbackTextArea.focus({ preventScroll: true });
+  fallbackTextArea.select();
+  fallbackTextArea.setSelectionRange(0, text.length);
+
+  try {
+    const hasFullSelection =
+      document.activeElement === fallbackTextArea &&
+      fallbackTextArea.selectionStart === 0 &&
+      fallbackTextArea.selectionEnd === text.length;
+
+    if (!hasFullSelection || !document.execCommand("copy")) {
+      throw new Error("Clipboard copy failed");
+    }
+  } finally {
+    previouslyFocused?.focus({ preventScroll: true });
+  }
+};
+
 const PostDetailModal = ({ post, open, onClose }: PostDetailModalProps) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
+  const fallbackCopyRef = useRef<HTMLTextAreaElement>(null);
   const [showTranslation, setShowTranslation] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
 
   const isNonEnglish =
     post?.language != null && post.language !== "en" && post.language !== "";
@@ -85,15 +125,20 @@ const PostDetailModal = ({ post, open, onClose }: PostDetailModalProps) => {
     onClose();
     setShowTranslation(false);
     setCopied(false);
+    setCopyFailed(false);
   };
 
   const handleCopy = async () => {
+    if (!post.textContent) return;
+
+    setCopyFailed(false);
     try {
-      await navigator.clipboard.writeText(post.textContent ?? "");
+      await copyText(post.textContent, fallbackCopyRef.current);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      // clipboard write failed silently
+      setCopied(false);
+      setCopyFailed(true);
     }
   };
 
@@ -154,6 +199,19 @@ const PostDetailModal = ({ post, open, onClose }: PostDetailModalProps) => {
         },
       }}
     >
+      <textarea
+        ref={fallbackCopyRef}
+        aria-hidden="true"
+        tabIndex={-1}
+        readOnly
+        style={{
+          position: "fixed",
+          width: 1,
+          height: 1,
+          opacity: 0,
+          pointerEvents: "none",
+        }}
+      />
       {/* Header */}
       <Box
         sx={{
@@ -404,22 +462,35 @@ const PostDetailModal = ({ post, open, onClose }: PostDetailModalProps) => {
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
               <Typography sx={dtStyle}>Full Post Content</Typography>
-              <Tooltip title={copied ? "Copied!" : "Copy to clipboard"} arrow>
+              <Tooltip
+                title={
+                  copyFailed
+                    ? "Copy failed. Check clipboard permissions or use HTTPS."
+                    : copied
+                      ? "Copied!"
+                      : "Copy to clipboard"
+                }
+                arrow
+              >
                 <IconButton
-                  onClick={handleCopy}
                   size="small"
-                  aria-label="Copy post content"
+                  aria-label={copyFailed ? "Copy failed" : "Copy post content"}
+                  onClick={handleCopy}
                   sx={{
                     width: 22,
                     height: 22,
-                    color: copied
-                      ? theme.palette.success.main
-                      : theme.palette.text.secondary,
+                    color: copyFailed
+                      ? theme.palette.error.main
+                      : copied
+                        ? theme.palette.success.main
+                        : theme.palette.text.secondary,
                     "&:hover": {
                       backgroundColor: theme.palette.action.hover,
-                      color: copied
-                        ? theme.palette.success.main
-                        : theme.palette.text.primary,
+                      color: copyFailed
+                        ? theme.palette.error.main
+                        : copied
+                          ? theme.palette.success.main
+                          : theme.palette.text.primary,
                     },
                   }}
                 >

@@ -9,6 +9,7 @@ import {
   Sphere,
 } from "react-simple-maps";
 
+import EmptyState from "components/EmptyState";
 import useDateRange from "contexts/dateRangeContext/useDateRange";
 import { useGeographicDistribution } from "hooks/useDashboardData";
 
@@ -41,7 +42,11 @@ const HotspotMap = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
   const { startDate, endDate, keywords } = useDateRange();
-  const { data = [], isLoading } = useGeographicDistribution({
+  const {
+    data = [],
+    isLoading,
+    isError,
+  } = useGeographicDistribution({
     startDate,
     endDate,
     keywords,
@@ -128,6 +133,12 @@ const HotspotMap = () => {
       >
         {isLoading ? (
           <Skeleton variant="circular" width={240} height={240} />
+        ) : isError ? (
+          <EmptyState
+            title="Unable to load locations"
+            description="Try refreshing the dashboard."
+            minHeight={260}
+          />
         ) : (
           <ComposableMap
             projection="geoOrthographic"
@@ -198,36 +209,38 @@ const HotspotMap = () => {
         )}
       </Box>
 
-      <Box
-        sx={{
-          mt: 1,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 2,
-        }}
-      >
-        {LEGEND.map(item => (
-          <Box
-            key={item.label}
-            sx={{ display: "flex", alignItems: "center", gap: 0.75 }}
-          >
+      {!isLoading && !isError && data.some(item => item.count > 0) && (
+        <Box
+          sx={{
+            mt: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 2,
+          }}
+        >
+          {LEGEND.map(item => (
             <Box
-              sx={{
-                width: 10,
-                height: 10,
-                borderRadius: "50%",
-                backgroundColor: item.color,
-              }}
-            />
-            <Typography
-              sx={{ fontSize: "12px", color: theme.palette.text.secondary }}
+              key={item.label}
+              sx={{ display: "flex", alignItems: "center", gap: 0.75 }}
             >
-              {item.label}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
+              <Box
+                sx={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: "50%",
+                  backgroundColor: item.color,
+                }}
+              />
+              <Typography
+                sx={{ fontSize: "12px", color: theme.palette.text.secondary }}
+              >
+                {item.label}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      )}
     </Box>
   );
 };

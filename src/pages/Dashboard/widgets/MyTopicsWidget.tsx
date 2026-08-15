@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import EmptyState from "components/EmptyState";
 import { Box, Skeleton, Typography } from "@mui/material";
 
 import useCardStyles from "hooks/useCardStyles";
@@ -17,7 +18,7 @@ const TOPIC_ICONS: Record<string, string> = {
 const MyTopicsWidget = () => {
   const navigate = useNavigate();
   const { startDate, endDate, keywords } = useDateRange();
-  const { data, isLoading } = useTopicBreakdown({
+  const { data, isLoading, isError } = useTopicBreakdown({
     startDate,
     endDate,
     keywords,
@@ -39,9 +40,33 @@ const MyTopicsWidget = () => {
     );
   }
 
-  if (!data || data.length === 0) return null;
+  if (isError) {
+    return (
+      <Box
+        sx={{
+          borderRadius: "16px",
+          backgroundColor: styles.card.backgroundColor,
+          border: styles.card.border,
+          p: 2.5,
+        }}
+      >
+        <Typography
+          sx={{ fontSize: "14px", fontWeight: 600, color: styles.text.primary }}
+        >
+          My Topics Overview
+        </Typography>
+        <EmptyState
+          title="Unable to load topic activity"
+          description="Try refreshing the dashboard."
+          minHeight={120}
+        />
+      </Box>
+    );
+  }
 
-  const sorted = [...data].sort((a, b) => b.totalViews - a.totalViews);
+  const sorted = (data ?? [])
+    .filter(topic => topic.postCount > 0)
+    .sort((a, b) => b.totalViews - a.totalViews);
 
   return (
     <Box

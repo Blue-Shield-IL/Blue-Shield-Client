@@ -8,6 +8,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Alert,
+  Avatar,
   Box,
   Button,
   CircularProgress,
@@ -67,6 +68,8 @@ const ROLES = [
 ];
 
 const ROLE_STORAGE_KEY = "blueshield.role";
+const MAX_PROFILE_PIC_SIZE = 5 * 1024 * 1024;
+const ACCEPTED_PROFILE_PIC_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 const OnboardingPage = () => {
   const navigate = useNavigate();
@@ -97,6 +100,10 @@ const OnboardingPage = () => {
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [pendingPic, setPendingPic] = useState<File | null>(null);
+  const [pendingPicPreview, setPendingPicPreview] = useState<string | null>(
+    null
+  );
 
   // Compute the initial topic selection from topics data
   const initialTopicIds = useMemo(() => {
@@ -137,6 +144,33 @@ const OnboardingPage = () => {
     }
   }, [user, navigate, cameFromSettings]);
 
+  useEffect(
+    () => () => {
+      if (pendingPicPreview) URL.revokeObjectURL(pendingPicPreview);
+    },
+    [pendingPicPreview]
+  );
+
+  const handlePicSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    if (!ACCEPTED_PROFILE_PIC_TYPES.includes(file.type)) {
+      setError("Choose a JPEG, PNG, or WebP image.");
+      return;
+    }
+
+    if (file.size > MAX_PROFILE_PIC_SIZE) {
+      setError("Profile pictures must be 5 MB or smaller.");
+      return;
+    }
+
+    setError("");
+    setPendingPic(file);
+    setPendingPicPreview(URL.createObjectURL(file));
+  };
+
   const handleRoleChange = (newRole: string) => {
     setRole(newRole);
     if (!cameFromSettings && topics.length > 0) {
@@ -166,6 +200,9 @@ const OnboardingPage = () => {
     setError("");
     setIsSubmitting(true);
     try {
+      if (pendingPic) {
+        await authService.uploadProfilePic(pendingPic);
+      }
       await keywordsService.submitOnboarding(selectedTopicIds);
       localStorage.setItem(ROLE_STORAGE_KEY, role);
       await authService.updateProfile({ role });
@@ -197,6 +234,39 @@ const OnboardingPage = () => {
         <Alert severity="error" sx={styles.errorAlert} role="alert">
           {error || "Failed to load topics."}
         </Alert>
+      )}
+
+      {!cameFromSettings && (
+        <Box sx={styles.profileSection}>
+          <Avatar
+            src={pendingPicPreview ?? user?.profilePicUrl ?? undefined}
+            alt={user?.name ?? user?.email ?? "Profile picture"}
+            sx={styles.profileAvatar}
+          >
+            {(user?.name ?? user?.email ?? "U").charAt(0).toUpperCase()}
+          </Avatar>
+          <Box sx={styles.profileDetails}>
+            <Typography sx={styles.profileLabel}>Profile picture</Typography>
+            <Typography sx={styles.profileHelp}>
+              JPEG, PNG, or WebP, up to 5 MB. You can change it later.
+            </Typography>
+            <Button
+              component="label"
+              variant="outlined"
+              size="small"
+              disabled={isSubmitting}
+              sx={styles.profileButton}
+            >
+              {pendingPic ? "Choose another image" : "Choose image"}
+              <input
+                type="file"
+                accept={ACCEPTED_PROFILE_PIC_TYPES.join(",")}
+                hidden
+                onChange={handlePicSelect}
+              />
+            </Button>
+          </Box>
+        </Box>
       )}
 
       {!cameFromSettings && (

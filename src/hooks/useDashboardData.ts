@@ -111,10 +111,14 @@ export const useMostViewed = (params?: DashboardQueryParams) =>
     staleTime: STALE_TIME,
   });
 
-export const usePostSearch = (params: PostSearchParams) =>
+export const usePostSearch = (
+  params: PostSearchParams,
+  enabled = true
+) =>
   useQuery({
     queryKey: ["dashboard", "posts", params],
     queryFn: () => searchPosts(params),
+    enabled,
     staleTime: 60 * 1000,
   });
 
