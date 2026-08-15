@@ -66,8 +66,12 @@ const copyText = async (
   fallbackTextArea: HTMLTextAreaElement | null
 ) => {
   if (navigator.clipboard && window.isSecureContext) {
-    await navigator.clipboard.writeText(text);
-    return;
+    try {
+      await navigator.clipboard.writeText(text);
+      return;
+    } catch {
+      // Fall through to the textarea fallback when clipboard access is denied.
+    }
   }
 
   if (!fallbackTextArea) {
