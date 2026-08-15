@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useTheme } from "@mui/material/styles";
+import CheckIcon from "@mui/icons-material/Check";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import {
   Box,
   Button,
@@ -8,12 +11,9 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import CheckIcon from "@mui/icons-material/Check";
 
-import { useTranslation } from "hooks/useDashboardData";
 import { getScoreColor } from "../helpers";
+import { useTranslation } from "hooks/useDashboardData";
 
 export interface PostModalData {
   author: string;
@@ -72,7 +72,7 @@ const PostDetailModal = ({ post, open, onClose }: PostDetailModalProps) => {
   const { data: translationData, isLoading: translating } = useTranslation(
     post?.textContent ?? "",
     post?.language ?? undefined,
-    showTranslation && isNonEnglish,
+    showTranslation && isNonEnglish
   );
 
   if (!post) return null;
@@ -168,11 +168,21 @@ const PostDetailModal = ({ post, open, onClose }: PostDetailModalProps) => {
       >
         <Box>
           <Typography
-            sx={{ fontSize: "16px", fontWeight: 600, color: theme.palette.text.primary }}
+            sx={{
+              fontSize: "16px",
+              fontWeight: 600,
+              color: theme.palette.text.primary,
+            }}
           >
             {post.channel || post.author}
           </Typography>
-          <Typography sx={{ fontSize: "12px", color: theme.palette.text.secondary, mt: 0.25 }}>
+          <Typography
+            sx={{
+              fontSize: "12px",
+              color: theme.palette.text.secondary,
+              mt: 0.25,
+            }}
+          >
             {post.channel
               ? post.author
               : `@${post.author.replace(/\s+/g, "_").toLowerCase()}`}
@@ -198,7 +208,15 @@ const PostDetailModal = ({ post, open, onClose }: PostDetailModalProps) => {
       </Box>
 
       {/* Body */}
-      <Box sx={{ maxHeight: "70vh", overflowY: "auto", px: 3, py: 3, ...scrollbarStyles }}>
+      <Box
+        sx={{
+          maxHeight: "70vh",
+          overflowY: "auto",
+          px: 3,
+          py: 3,
+          ...scrollbarStyles,
+        }}
+      >
         {/* Meta grid */}
         <Box
           sx={{
@@ -303,7 +321,14 @@ const PostDetailModal = ({ post, open, onClose }: PostDetailModalProps) => {
                 title="Calculated as: views × 0.5 + likes × 0.3 + shares × 0.2"
                 arrow
               >
-                <Typography sx={{ ...dtStyle, width: "fit-content", cursor: "help", borderBottom: `1px dotted ${theme.palette.text.secondary}` }}>
+                <Typography
+                  sx={{
+                    ...dtStyle,
+                    width: "fit-content",
+                    cursor: "help",
+                    borderBottom: `1px dotted ${theme.palette.text.secondary}`,
+                  }}
+                >
                   Popularity
                 </Typography>
               </Tooltip>
@@ -319,14 +344,16 @@ const PostDetailModal = ({ post, open, onClose }: PostDetailModalProps) => {
           <Box sx={{ mt: 3 }}>
             <Typography sx={dtStyle}>IHRA Categories</Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, mt: 1 }}>
-              {post.ihraLabels.map((c) => (
+              {post.ihraLabels.map(c => (
                 <Box
                   key={c}
                   sx={{
                     fontSize: "12px",
                     fontWeight: 500,
                     color: isDark ? "#93C5FD" : "#2563EB",
-                    backgroundColor: isDark ? "rgba(37,99,235,0.15)" : "#EFF6FF",
+                    backgroundColor: isDark
+                      ? "rgba(37,99,235,0.15)"
+                      : "#EFF6FF",
                     borderRadius: "999px",
                     px: 1.25,
                     py: 0.5,
@@ -344,14 +371,16 @@ const PostDetailModal = ({ post, open, onClose }: PostDetailModalProps) => {
           <Box sx={{ mt: 3 }}>
             <Typography sx={dtStyle}>Keywords</Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, mt: 1 }}>
-              {post.keywords.map((kw) => (
+              {post.keywords.map(kw => (
                 <Box
                   key={kw}
                   sx={{
                     fontSize: "12px",
                     fontWeight: 500,
                     color: isDark ? "#D1D5DB" : "#475569",
-                    backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#F1F5F9",
+                    backgroundColor: isDark
+                      ? "rgba(255,255,255,0.08)"
+                      : "#F1F5F9",
                     borderRadius: "999px",
                     px: 1.25,
                     py: 0.5,
@@ -474,7 +503,12 @@ const PostDetailModal = ({ post, open, onClose }: PostDetailModalProps) => {
                   sx={{ display: "flex", alignItems: "center", gap: 1, py: 1 }}
                 >
                   <CircularProgress size={14} />
-                  <Typography sx={{ fontSize: "13px", color: theme.palette.text.secondary }}>
+                  <Typography
+                    sx={{
+                      fontSize: "13px",
+                      color: theme.palette.text.secondary,
+                    }}
+                  >
                     Translating...
                   </Typography>
                 </Box>
@@ -487,7 +521,8 @@ const PostDetailModal = ({ post, open, onClose }: PostDetailModalProps) => {
                     whiteSpace: "pre-wrap",
                   }}
                 >
-                  {translationData?.translatedText ?? "Translation unavailable."}
+                  {translationData?.translatedText ??
+                    "Translation unavailable."}
                 </Typography>
               )}
             </Box>

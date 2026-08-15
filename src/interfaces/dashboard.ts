@@ -134,6 +134,9 @@ export interface SemanticSearchItem extends PostItem {
 export interface SemanticSearchResult {
   items: SemanticSearchItem[];
   total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 }
 
 export interface PostSearchParams {

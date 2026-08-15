@@ -1,5 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import CloseIcon from "@mui/icons-material/Close";
 import { useSearchParams } from "react-router-dom";
+import SearchIcon from "@mui/icons-material/Search";
+import { useTheme, type Theme } from "@mui/material/styles";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Autocomplete,
   Box,
@@ -11,14 +14,19 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import SearchIcon from "@mui/icons-material/Search";
-import { useTheme, type Theme } from "@mui/material/styles";
 
 import AppShell from "components/AppShell";
 import CountryFlag from "components/CountryFlag";
+import type { PostItem } from "interfaces/dashboard";
 import DateRangePicker from "components/DateRangePicker";
+import PostDetailModal from "./components/PostDetailModal";
 import type { RangePreset } from "components/DateRangePicker";
+import {
+  getScoreColor,
+  LANGUAGE_OPTIONS,
+  SENTIMENT_COLORS,
+  SENTIMENT_OPTIONS,
+} from "./helpers";
 import {
   useCountries,
   useLanguages,
@@ -27,14 +35,6 @@ import {
   useSources,
   useTopKeywords,
 } from "hooks/useDashboardData";
-import type { PostItem } from "interfaces/dashboard";
-import PostDetailModal from "./components/PostDetailModal";
-import {
-  getScoreColor,
-  LANGUAGE_OPTIONS,
-  SENTIMENT_COLORS,
-  SENTIMENT_OPTIONS,
-} from "./helpers";
 
 const PAGE_SIZE = 12;
 
@@ -72,7 +72,7 @@ const FreeSearchPage = () => {
   const [searchText, setSearchText] = useState("");
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>(
-    urlKeywords ? urlKeywords.split(",").filter(Boolean) : [],
+    urlKeywords ? urlKeywords.split(",").filter(Boolean) : []
   );
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
@@ -88,7 +88,9 @@ const FreeSearchPage = () => {
   const [applied, setApplied] = useState({
     search: "",
     sources: [] as string[],
-    keywords: urlKeywords ? urlKeywords.split(",").filter(Boolean) : ([] as string[]),
+    keywords: urlKeywords
+      ? urlKeywords.split(",").filter(Boolean)
+      : ([] as string[]),
     countries: [] as string[],
     languages: [] as string[],
     sentiments: [] as string[],
@@ -122,28 +124,30 @@ const FreeSearchPage = () => {
   const { data: languagesData } = useLanguages();
 
   const keywordOptions = useMemo(
-    () => (keywordsData || []).map((k) => k.keyword),
-    [keywordsData],
+    () => (keywordsData || []).map(k => k.keyword),
+    [keywordsData]
   );
   const sourceOptions = useMemo(
-    () => (sourcesData || []).map((s) => s.name),
-    [sourcesData],
+    () => (sourcesData || []).map(s => s.name),
+    [sourcesData]
   );
   const countryOptions = useMemo(
-    () => (countriesData || []).map((c) => c.country),
-    [countriesData],
+    () => (countriesData || []).map(c => c.country),
+    [countriesData]
   );
   const languageOptions = useMemo(() => {
     if (languagesData && languagesData.length > 0) {
-      return languagesData.map((l) => ({ code: l.code, label: l.name }));
+      return languagesData.map(l => ({ code: l.code, label: l.name }));
     }
     return LANGUAGE_OPTIONS;
   }, [languagesData]);
 
-  const {
-    data: semanticData,
-    isLoading: semanticLoading,
-  } = useSemanticSearch(semanticQuery, page, PAGE_SIZE, isSemanticMode && !!semanticQuery);
+  const { data: semanticData, isLoading: semanticLoading } = useSemanticSearch(
+    semanticQuery,
+    page,
+    PAGE_SIZE,
+    isSemanticMode && !!semanticQuery
+  );
 
   const { data, isLoading, isError, refetch, isFetching } = usePostSearch({
     page,
@@ -152,8 +156,12 @@ const FreeSearchPage = () => {
     author: applied.sources.length ? applied.sources.join(",") : undefined,
     keywords: applied.keywords.length ? applied.keywords.join(",") : undefined,
     country: applied.countries.length ? applied.countries.join(",") : undefined,
-    language: applied.languages.length ? applied.languages.join(",") : undefined,
-    sentiment: applied.sentiments.length ? applied.sentiments.join(",") : undefined,
+    language: applied.languages.length
+      ? applied.languages.join(",")
+      : undefined,
+    sentiment: applied.sentiments.length
+      ? applied.sentiments.join(",")
+      : undefined,
     minScore: applied.minScore,
     maxScore: applied.maxScore,
     startDate: applied.startDate || undefined,
@@ -238,7 +246,7 @@ const FreeSearchPage = () => {
   const totalPages = activeData?.totalPages || 1;
   const pageNumbers = useMemo(
     () => buildPageNumbers(page, totalPages),
-    [page, totalPages],
+    [page, totalPages]
   );
 
   const inputStyle = {
@@ -276,10 +284,7 @@ const FreeSearchPage = () => {
   };
 
   return (
-    <AppShell
-      title="Post Search"
-      subtitle="Search and filter collected posts."
-    >
+    <AppShell title="Post Search" subtitle="Search and filter collected posts.">
       <Box
         ref={topRef}
         sx={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0 }}
@@ -310,7 +315,9 @@ const FreeSearchPage = () => {
                   color: theme.palette.text.secondary,
                 }}
               >
-                {isSemanticMode ? "Semantic Search (natural language)" : "Search"}
+                {isSemanticMode
+                  ? "Semantic Search (natural language)"
+                  : "Search"}
               </Typography>
               <Button
                 size="small"
@@ -347,12 +354,12 @@ const FreeSearchPage = () => {
               </Box>
               <InputBase
                 value={isSemanticMode ? semanticInput : searchText}
-                onChange={(e) =>
+                onChange={e =>
                   isSemanticMode
                     ? setSemanticInput(e.target.value)
                     : setSearchText(e.target.value)
                 }
-                onKeyDown={(e) => {
+                onKeyDown={e => {
                   if (e.key === "Enter") {
                     if (isSemanticMode) {
                       setSemanticQuery(semanticInput.trim());
@@ -422,7 +429,7 @@ const FreeSearchPage = () => {
                     );
                   })
                 }
-                renderInput={(params) => (
+                renderInput={params => (
                   <TextField
                     {...params}
                     placeholder={
@@ -474,7 +481,7 @@ const FreeSearchPage = () => {
                     );
                   })
                 }
-                renderInput={(params) => (
+                renderInput={params => (
                   <TextField
                     {...params}
                     placeholder={
@@ -529,7 +536,7 @@ const FreeSearchPage = () => {
                     );
                   })
                 }
-                renderInput={(params) => (
+                renderInput={params => (
                   <TextField
                     {...params}
                     placeholder={
@@ -572,13 +579,13 @@ const FreeSearchPage = () => {
                 multiple
                 size="small"
                 options={languageOptions}
-                getOptionLabel={(opt) => opt.label}
+                getOptionLabel={opt => opt.label}
                 isOptionEqualToValue={(opt, val) => opt.code === val.code}
-                value={languageOptions.filter((l) =>
-                  selectedLanguages.includes(l.code),
+                value={languageOptions.filter(l =>
+                  selectedLanguages.includes(l.code)
                 )}
                 onChange={(_, newVal) =>
-                  setSelectedLanguages(newVal.map((v) => v.code))
+                  setSelectedLanguages(newVal.map(v => v.code))
                 }
                 disableCloseOnSelect
                 limitTags={2}
@@ -590,7 +597,7 @@ const FreeSearchPage = () => {
                     </Typography>
                   </li>
                 )}
-                renderInput={(params) => (
+                renderInput={params => (
                   <TextField
                     {...params}
                     placeholder={
@@ -641,7 +648,7 @@ const FreeSearchPage = () => {
                     <Typography sx={{ fontSize: "13px" }}>{option}</Typography>
                   </li>
                 )}
-                renderInput={(params) => (
+                renderInput={params => (
                   <TextField
                     {...params}
                     placeholder={
@@ -703,7 +710,14 @@ const FreeSearchPage = () => {
               onCustomRange={handleCustomRange}
             />
 
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, ml: "auto" }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                ml: "auto",
+              }}
+            >
               <Button
                 onClick={handleSearch}
                 variant="contained"
@@ -746,7 +760,9 @@ const FreeSearchPage = () => {
                   color: theme.palette.text.secondary,
                 }}
               >
-                {(isSemanticMode ? semanticData : data) ? `${(isSemanticMode ? semanticData : data)!.total.toLocaleString()} results` : ""}
+                {(isSemanticMode ? semanticData : data)
+                  ? `${(isSemanticMode ? semanticData : data)!.total.toLocaleString()} results`
+                  : ""}
               </Typography>
             </Box>
           </Box>
@@ -790,7 +806,7 @@ const FreeSearchPage = () => {
                   sortOrder,
                   setSortBy,
                   setSortOrder,
-                  setPage,
+                  setPage
                 )
               }
             >
@@ -811,7 +827,7 @@ const FreeSearchPage = () => {
                   sortOrder,
                   setSortBy,
                   setSortOrder,
-                  setPage,
+                  setPage
                 )
               }
             >
@@ -834,7 +850,7 @@ const FreeSearchPage = () => {
                   sortOrder,
                   setSortBy,
                   setSortOrder,
-                  setPage,
+                  setPage
                 )
               }
             >
@@ -853,16 +869,12 @@ const FreeSearchPage = () => {
                   sortOrder,
                   setSortBy,
                   setSortOrder,
-                  setPage,
+                  setPage
                 )
               }
             >
               Published{" "}
-              {sortBy === "created_at"
-                ? sortOrder === "asc"
-                  ? "↑"
-                  : "↓"
-                : ""}
+              {sortBy === "created_at" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
             </Box>
             <Box>Sentiment</Box>
             <Box>Keywords</Box>
@@ -910,86 +922,128 @@ const FreeSearchPage = () => {
                 transition: "opacity 0.15s",
               }}
             >
-              {((isSemanticMode ? semanticData : data)?.items ?? []).map((post: PostItem) => (
-                <Box
-                  key={post.postId}
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: "160px 130px 1fr 80px 90px 90px 150px 140px",
-                    alignItems: "center",
-                    px: 2,
-                    py: 1.5,
-                    borderBottom: `1px solid ${isDark ? theme.palette.divider : "#F1F5F9"}`,
-                    transition: "background-color 0.12s",
-                    cursor: "pointer",
-                    "&:hover": { backgroundColor: theme.palette.action.hover },
-                    "&:last-child": { borderBottom: "none" },
-                    minWidth: 0,
-                  }}
-                  onClick={() => setSelectedPost(post)}
-                >
-                  <Box sx={{ minWidth: 0 }}>
-                    <Typography
-                      sx={{
-                        fontSize: "13px",
-                        fontWeight: 500,
-                        color: theme.palette.text.primary,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {post.channel || post.author}
-                    </Typography>
-                    <Typography
-                      sx={{
-                        fontSize: "11px",
-                        color: theme.palette.text.secondary,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {post.channel
-                        ? post.author
-                        : `@${post.author.replace(/\s+/g, "_").toLowerCase()}`}
-                    </Typography>
-                  </Box>
+              {((isSemanticMode ? semanticData : data)?.items ?? []).map(
+                (post: PostItem) => (
                   <Box
+                    key={post.postId}
                     sx={{
-                      display: "flex",
+                      display: "grid",
+                      gridTemplateColumns:
+                        "160px 130px 1fr 80px 90px 90px 150px 140px",
                       alignItems: "center",
-                      gap: 0.75,
+                      px: 2,
+                      py: 1.5,
+                      borderBottom: `1px solid ${isDark ? theme.palette.divider : "#F1F5F9"}`,
+                      transition: "background-color 0.12s",
+                      cursor: "pointer",
+                      "&:hover": {
+                        backgroundColor: theme.palette.action.hover,
+                      },
+                      "&:last-child": { borderBottom: "none" },
                       minWidth: 0,
                     }}
+                    onClick={() => setSelectedPost(post)}
                   >
-                    {post.country ? (
-                      <>
-                        <CountryFlag country={post.country} width={18} />
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography
+                        sx={{
+                          fontSize: "13px",
+                          fontWeight: 500,
+                          color: theme.palette.text.primary,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {post.channel || post.author}
+                      </Typography>
+                      <Typography
+                        sx={{
+                          fontSize: "11px",
+                          color: theme.palette.text.secondary,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {post.channel
+                          ? post.author
+                          : `@${post.author.replace(/\s+/g, "_").toLowerCase()}`}
+                      </Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.75,
+                        minWidth: 0,
+                      }}
+                    >
+                      {post.country ? (
+                        <>
+                          <CountryFlag country={post.country} width={18} />
+                          <Typography
+                            sx={{
+                              fontSize: "13px",
+                              color: theme.palette.text.secondary,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {post.country}
+                          </Typography>
+                        </>
+                      ) : (
                         <Typography
                           sx={{
                             fontSize: "13px",
                             color: theme.palette.text.secondary,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
                           }}
                         >
-                          {post.country}
+                          —
                         </Typography>
-                      </>
-                    ) : (
+                      )}
+                    </Box>
+                    <Box sx={{ minWidth: 0, pr: 1 }}>
                       <Typography
                         sx={{
                           fontSize: "13px",
                           color: theme.palette.text.secondary,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
                         }}
                       >
-                        —
+                        {post.textContent
+                          ? post.textContent.length > 100
+                            ? post.textContent.slice(0, 100) + "…"
+                            : post.textContent
+                          : "—"}
                       </Typography>
-                    )}
-                  </Box>
-                  <Box sx={{ minWidth: 0, pr: 1 }}>
+                    </Box>
+                    <Box>
+                      {post.antisemitismScore !== null ? (
+                        <ScoreBadge score={post.antisemitismScore} />
+                      ) : (
+                        <Typography
+                          sx={{
+                            fontSize: "13px",
+                            color: theme.palette.text.secondary,
+                          }}
+                        >
+                          —
+                        </Typography>
+                      )}
+                    </Box>
+                    <Typography
+                      sx={{
+                        fontSize: "13px",
+                        color: theme.palette.text.secondary,
+                      }}
+                    >
+                      {formatNumber(post.views)}
+                    </Typography>
                     <Typography
                       sx={{
                         fontSize: "13px",
@@ -999,98 +1053,61 @@ const FreeSearchPage = () => {
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {post.textContent
-                        ? post.textContent.length > 100
-                          ? post.textContent.slice(0, 100) + "…"
-                          : post.textContent
-                        : "—"}
+                      {formatDate(post.createdAt)}
                     </Typography>
-                  </Box>
-                  <Box>
-                    {post.antisemitismScore !== null ? (
-                      <ScoreBadge score={post.antisemitismScore} />
-                    ) : (
-                      <Typography
-                        sx={{
-                          fontSize: "13px",
-                          color: theme.palette.text.secondary,
-                        }}
-                      >
-                        —
-                      </Typography>
-                    )}
-                  </Box>
-                  <Typography
-                    sx={{
-                      fontSize: "13px",
-                      color: theme.palette.text.secondary,
-                    }}
-                  >
-                    {formatNumber(post.views)}
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontSize: "13px",
-                      color: theme.palette.text.secondary,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {formatDate(post.createdAt)}
-                  </Typography>
-                  <Box>
-                    {post.sentiment ? (
-                      <SentimentBadge sentiment={post.sentiment} />
-                    ) : (
-                      <Typography
-                        sx={{
-                          fontSize: "13px",
-                          color: theme.palette.text.secondary,
-                        }}
-                      >
-                        —
-                      </Typography>
-                    )}
-                  </Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: 0.5,
-                      minWidth: 0,
-                    }}
-                  >
-                    {(post.ihraLabels.length > 0
-                      ? post.ihraLabels
-                      : post.keywords
-                    )
-                      .slice(0, 2)
-                      .map((tag: string) => (
-                        <Box
-                          key={tag}
+                    <Box>
+                      {post.sentiment ? (
+                        <SentimentBadge sentiment={post.sentiment} />
+                      ) : (
+                        <Typography
                           sx={{
-                            fontSize: "10px",
-                            fontWeight: 500,
-                            color: theme.palette.primary.main,
-                            backgroundColor: isDark
-                              ? "rgba(59,130,246,0.15)"
-                              : "#EFF6FF",
-                            borderRadius: "999px",
-                            px: 0.8,
-                            py: 0.2,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                            maxWidth: 70,
+                            fontSize: "13px",
+                            color: theme.palette.text.secondary,
                           }}
                         >
-                          {tag}
-                        </Box>
-                      ))}
+                          —
+                        </Typography>
+                      )}
+                    </Box>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 0.5,
+                        minWidth: 0,
+                      }}
+                    >
+                      {(post.ihraLabels.length > 0
+                        ? post.ihraLabels
+                        : post.keywords
+                      )
+                        .slice(0, 2)
+                        .map((tag: string) => (
+                          <Box
+                            key={tag}
+                            sx={{
+                              fontSize: "10px",
+                              fontWeight: 500,
+                              color: theme.palette.primary.main,
+                              backgroundColor: isDark
+                                ? "rgba(59,130,246,0.15)"
+                                : "#EFF6FF",
+                              borderRadius: "999px",
+                              px: 0.8,
+                              py: 0.2,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              maxWidth: 70,
+                            }}
+                          >
+                            {tag}
+                          </Box>
+                        ))}
+                    </Box>
                   </Box>
-                </Box>
-              ))}
+                )
+              )}
             </Box>
           ) : (
             <Box
@@ -1136,7 +1153,7 @@ const FreeSearchPage = () => {
             >
               <PagerButton
                 disabled={page <= 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                onClick={() => setPage(p => Math.max(1, p - 1))}
                 theme={theme}
               >
                 ‹ Previous
@@ -1168,9 +1185,7 @@ const FreeSearchPage = () => {
                       color:
                         p === page ? "#FFFFFF" : theme.palette.text.secondary,
                       backgroundColor:
-                        p === page
-                          ? theme.palette.primary.main
-                          : "transparent",
+                        p === page ? theme.palette.primary.main : "transparent",
                       fontWeight: p === page ? 600 : 400,
                       cursor: "pointer",
                       transition: "all 0.12s",
@@ -1180,19 +1195,17 @@ const FreeSearchPage = () => {
                             ? theme.palette.primary.dark
                             : theme.palette.action.hover,
                         color:
-                          p === page
-                            ? "#FFFFFF"
-                            : theme.palette.primary.main,
+                          p === page ? "#FFFFFF" : theme.palette.primary.main,
                       },
                     }}
                   >
                     {p}
                   </Box>
-                ),
+                )
               )}
               <PagerButton
                 disabled={page >= totalPages}
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 theme={theme}
               >
                 Next ›
@@ -1219,7 +1232,7 @@ const CompactChip = ({
   isDark,
 }: {
   label: string;
-  onDelete: (e: any) => void;
+  onDelete: (e: React.MouseEvent) => void;
   theme: Theme;
   isDark: boolean;
 }) => (
@@ -1272,7 +1285,7 @@ const CountryChip = ({
   isDark,
 }: {
   country: string;
-  onDelete: (e: any) => void;
+  onDelete: (e: React.MouseEvent) => void;
   theme: Theme;
   isDark: boolean;
 }) => (
@@ -1307,7 +1320,10 @@ const CountryChip = ({
 
 /* ─── Sentiment Badge ─────────────────────────────────────────────────── */
 const SentimentBadge = ({ sentiment }: { sentiment: string }) => {
-  const colors = SENTIMENT_COLORS[sentiment] ?? { bg: "#F1F5F9", text: "#64748B" };
+  const colors = SENTIMENT_COLORS[sentiment] ?? {
+    bg: "#F1F5F9",
+    text: "#64748B",
+  };
   return (
     <Box
       sx={{
@@ -1387,7 +1403,7 @@ const toggleSort = (
   sortOrder: "asc" | "desc",
   setSortBy: (f: string) => void,
   setSortOrder: (o: "asc" | "desc") => void,
-  setPage: (p: number) => void,
+  setPage: (p: number) => void
 ) => {
   if (sortBy === field) {
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -1400,7 +1416,7 @@ const toggleSort = (
 
 const buildPageNumbers = (
   current: number,
-  total: number,
+  total: number
 ): (number | "...")[] => {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
   const pages: (number | "...")[] = [1];

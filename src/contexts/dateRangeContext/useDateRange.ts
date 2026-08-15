@@ -1,6 +1,10 @@
 import { createContext, useContext } from "react";
 
-export type RangePreset = "All Time" | "Last 7 Days" | "Last 30 Days" | "Custom Range";
+export type RangePreset =
+  | "All Time"
+  | "Last 7 Days"
+  | "Last 30 Days"
+  | "Custom Range";
 
 export interface DateRangeContextType {
   preset: RangePreset;
@@ -13,7 +17,7 @@ export interface DateRangeContextType {
 }
 
 export const DateRangeContext = createContext<DateRangeContextType>(
-  {} as DateRangeContextType,
+  {} as DateRangeContextType
 );
 
 const useDateRange = () => useContext(DateRangeContext);

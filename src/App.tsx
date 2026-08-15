@@ -1,20 +1,26 @@
 import styles from "./App.style";
+import { useEffect } from "react";
 import MuiTheme from "./MuiTheme";
 import LoginPage from "pages/Login";
 import { Box } from "@mui/material";
-import SettingsPage from "pages/Settings";
 import RegisterPage from "pages/Register";
+import SettingsPage from "pages/Settings";
 import { ROUTES } from "constants/routes";
 import DashboardPage from "pages/Dashboard";
 import FreeSearchPage from "pages/FreeSearch";
 import OnboardingPage from "pages/Onboarding";
 import { AuthProvider } from "contexts/authContext";
-import { ThemeModeProvider } from "contexts/themeContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { ThemeModeProvider } from "contexts/themeContext";
 import { ProtectedRoute, PublicRoute } from "pages/AuthRender";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();

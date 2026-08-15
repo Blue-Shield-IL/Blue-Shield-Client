@@ -8,7 +8,7 @@ export interface ThemeModeContextType {
 }
 
 export const ThemeModeContext = createContext<ThemeModeContextType>(
-  {} as ThemeModeContextType,
+  {} as ThemeModeContextType
 );
 
 const useThemeMode = () => useContext(ThemeModeContext);

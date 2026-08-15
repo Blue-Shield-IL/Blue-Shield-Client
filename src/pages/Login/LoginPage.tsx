@@ -1,9 +1,9 @@
 import { useState } from "react";
-import styles from "./LoginPage.style";
-import { useForm } from "react-hook-form";
 import { ROUTES } from "constants/routes";
 import useAuth from "contexts/authContext";
+import useLoginStyles from "./LoginPage.style";
 import { GoogleLogin } from "@react-oauth/google";
+import { useForm, useWatch } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { Logo, EyeOpen, EyeClosed } from "components/Svg";
 import {
@@ -28,17 +28,18 @@ const LoginPage = () => {
   const { login, googleAuth } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const styles = useLoginStyles();
 
   const {
+    control,
     register,
     handleSubmit,
-    watch,
     formState: { isSubmitting, errors },
   } = useForm<LoginFormValues>({
     defaultValues: { email: "", password: "", rememberMe: false },
   });
 
-  const rememberMe = watch("rememberMe");
+  const rememberMe = useWatch({ control, name: "rememberMe" });
 
   const onSubmit = async (data: LoginFormValues) => {
     setError("");

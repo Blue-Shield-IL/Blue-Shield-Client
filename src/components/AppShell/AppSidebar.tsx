@@ -1,10 +1,10 @@
-import { Box, IconButton, Tooltip, Typography, useTheme } from "@mui/material";
-import LogoutIcon from "@mui/icons-material/Logout";
-import { ROUTES } from "constants/routes";
-import { useLocation, useNavigate } from "react-router-dom";
 import Logo from "components/Svg/Logo";
+import { ROUTES } from "constants/routes";
 import useAuth from "contexts/authContext";
+import LogoutIcon from "@mui/icons-material/Logout";
+import { useLocation, useNavigate } from "react-router-dom";
 import useThemeMode from "contexts/themeContext/useThemeMode";
+import { Box, IconButton, Tooltip, Typography, useTheme } from "@mui/material";
 
 export const SIDEBAR_WIDTH = 248;
 
@@ -104,54 +104,77 @@ const AppSidebar = () => {
           <Logo width={24} height={24} />
         </Box>
         <Box sx={{ lineHeight: 1.2 }}>
-          <Typography sx={{ fontSize: "14px", fontWeight: 700, color: theme.palette.text.primary }}>
+          <Typography
+            sx={{
+              fontSize: "14px",
+              fontWeight: 700,
+              color: theme.palette.text.primary,
+            }}
+          >
             Blue Shield
           </Typography>
-          <Typography sx={{ fontSize: "12px", color: theme.palette.text.secondary }}>
+          <Typography
+            sx={{ fontSize: "12px", color: theme.palette.text.secondary }}
+          >
             Threat Intelligence
           </Typography>
         </Box>
       </Box>
 
       {/* Nav */}
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, p: 2, flex: 1, justifyContent: "space-between" }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 0.5,
+          p: 2,
+          flex: 1,
+          justifyContent: "space-between",
+        }}
+      >
         <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-        {NAV.map((item) => {
-          const active =
-            location.pathname === item.route ||
-            location.pathname.startsWith(item.route + "/");
-          return (
-            <Box
-              key={item.route}
-              onClick={() => navigate(item.route)}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                px: 1.5,
-                py: 1.25,
-                borderRadius: "10px",
-                cursor: "pointer",
-                fontSize: "14px",
-                fontWeight: active ? 600 : 500,
-                color: active ? "#3B82F6" : theme.palette.text.secondary,
-                backgroundColor: active
-                  ? isDark ? "#1E3A5F" : "#EFF6FF"
-                  : "transparent",
-                transition: "all 0.15s",
-                "&:hover": {
+          {NAV.map(item => {
+            const active =
+              location.pathname === item.route ||
+              location.pathname.startsWith(item.route + "/");
+            return (
+              <Box
+                key={item.route}
+                onClick={() => navigate(item.route)}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.5,
+                  px: 1.5,
+                  py: 1.25,
+                  borderRadius: "10px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: active ? 600 : 500,
+                  color: active ? "#3B82F6" : theme.palette.text.secondary,
                   backgroundColor: active
-                    ? isDark ? "#1E3A5F" : "#EFF6FF"
-                    : isDark ? "#334155" : "#F9FAFB",
-                  color: active ? "#3B82F6" : theme.palette.text.primary,
-                },
-              }}
-            >
-              <Icon name={item.icon} />
-              {item.label}
-            </Box>
-          );
-        })}
+                    ? isDark
+                      ? "#1E3A5F"
+                      : "#EFF6FF"
+                    : "transparent",
+                  transition: "all 0.15s",
+                  "&:hover": {
+                    backgroundColor: active
+                      ? isDark
+                        ? "#1E3A5F"
+                        : "#EFF6FF"
+                      : isDark
+                        ? "#334155"
+                        : "#F9FAFB",
+                    color: active ? "#3B82F6" : theme.palette.text.primary,
+                  },
+                }}
+              >
+                <Icon name={item.icon} />
+                {item.label}
+              </Box>
+            );
+          })}
         </Box>
 
         <Tooltip title="Log out" placement="right" arrow>

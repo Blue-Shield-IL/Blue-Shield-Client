@@ -29,7 +29,11 @@ const buildParams = (params?: DashboardQueryParams) => ({
 });
 
 export const getStats = async (params?: DashboardQueryParams) =>
-  (await dashboardApi.get<DashboardStats>("/stats", { params: buildParams(params) })).data;
+  (
+    await dashboardApi.get<DashboardStats>("/stats", {
+      params: buildParams(params),
+    })
+  ).data;
 
 export const getThreatTrend = async (params?: DashboardQueryParams) =>
   (
@@ -39,7 +43,11 @@ export const getThreatTrend = async (params?: DashboardQueryParams) =>
   ).data;
 
 export const getSentimentDistribution = async (params?: DashboardQueryParams) =>
-  (await dashboardApi.get<SentimentDistributionItem[]>("/sentiment", { params: buildParams(params) })).data;
+  (
+    await dashboardApi.get<SentimentDistributionItem[]>("/sentiment", {
+      params: buildParams(params),
+    })
+  ).data;
 
 export const getTopKeywords = async (params?: DashboardQueryParams) =>
   (
@@ -48,8 +56,14 @@ export const getTopKeywords = async (params?: DashboardQueryParams) =>
     })
   ).data;
 
-export const getGeographicDistribution = async (params?: DashboardQueryParams) =>
-  (await dashboardApi.get<GeographicDistributionItem[]>("/geographic", { params: buildParams(params) })).data;
+export const getGeographicDistribution = async (
+  params?: DashboardQueryParams
+) =>
+  (
+    await dashboardApi.get<GeographicDistributionItem[]>("/geographic", {
+      params: buildParams(params),
+    })
+  ).data;
 
 export const getTopAuthors = async (params?: DashboardQueryParams) =>
   (
@@ -86,15 +100,20 @@ export const translateToEnglish = async (text: string, source?: string) =>
   (
     await dashboardApi.get<{ translatedText: string; detectedSource: string }>(
       "/translate",
-      { params: { text, source } },
+      { params: { text, source } }
     )
   ).data;
 
 export const getLanguages = async () =>
-  (await dashboardApi.get<{ code: string; name: string; count: number }[]>("/languages")).data;
+  (
+    await dashboardApi.get<{ code: string; name: string; count: number }[]>(
+      "/languages"
+    )
+  ).data;
 
 export const getCountries = async () =>
-  (await dashboardApi.get<{ country: string; count: number }[]>("/countries")).data;
+  (await dashboardApi.get<{ country: string; count: number }[]>("/countries"))
+    .data;
 
 export const getSources = async () =>
   (await dashboardApi.get<{ name: string; count: number }[]>("/sources")).data;
@@ -121,9 +140,14 @@ export const getMostViewed = async (params?: DashboardQueryParams) =>
   ).data;
 
 export const getDateBounds = async () =>
-  (await dashboardApi.get<{ earliest: string; latest: string }>("/date-bounds")).data;
+  (await dashboardApi.get<{ earliest: string; latest: string }>("/date-bounds"))
+    .data;
 
-export const semanticSearch = async (query: string, page = 1, pageSize = 20) => {
+export const semanticSearch = async (
+  query: string,
+  page = 1,
+  pageSize = 20
+) => {
   try {
     return (
       await dashboardApi.get<SemanticSearchResult>("/semantic-search", {
@@ -131,12 +155,26 @@ export const semanticSearch = async (query: string, page = 1, pageSize = 20) => 
       })
     ).data;
   } catch {
-    return { items: [], total: 0, page, pageSize, totalPages: 0 } as any;
+    return {
+      items: [],
+      total: 0,
+      page,
+      pageSize,
+      totalPages: 0,
+    } as SemanticSearchResult;
   }
 };
 
 export const getIhraBreakdown = async (params?: DashboardQueryParams) =>
-  (await dashboardApi.get<IhraCategoryItem[]>("/ihra-breakdown", { params: buildParams(params) })).data;
+  (
+    await dashboardApi.get<IhraCategoryItem[]>("/ihra-breakdown", {
+      params: buildParams(params),
+    })
+  ).data;
 
 export const getTopicBreakdown = async (params?: DashboardQueryParams) =>
-  (await dashboardApi.get<TopicBreakdownItem[]>("/topic-breakdown", { params: buildParams(params) })).data;
+  (
+    await dashboardApi.get<TopicBreakdownItem[]>("/topic-breakdown", {
+      params: buildParams(params),
+    })
+  ).data;

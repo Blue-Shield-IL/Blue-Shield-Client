@@ -1,9 +1,9 @@
+import type { Theme } from "@mui/material/styles";
 import { useCallback, useMemo, useState } from "react";
-import { Box, IconButton, Popover, Typography, useTheme } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import type { Theme } from "@mui/material/styles";
+import { Box, IconButton, Popover, Typography, useTheme } from "@mui/material";
 
 const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 const MONTHS = [
@@ -52,8 +52,7 @@ const MiniCalendar = ({
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const cells: (Date | null)[] = [];
     for (let i = 0; i < firstDay; i++) cells.push(null);
-    for (let d = 1; d <= daysInMonth; d++)
-      cells.push(new Date(year, month, d));
+    for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(year, month, d));
     return cells;
   }, [year, month]);
 
@@ -106,7 +105,7 @@ const MiniCalendar = ({
           mb: 0.5,
         }}
       >
-        {DAYS.map((d) => (
+        {DAYS.map(d => (
           <Typography
             key={d}
             sx={{
@@ -211,17 +210,16 @@ const DateRangeFilter = ({
   startDate,
   endDate,
   onChange,
-  onClear: _onClear,
 }: DateRangeFilterProps) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [pickStart, setPickStart] = useState<Date | null>(
-    startDate ? new Date(startDate) : null,
+    startDate ? new Date(startDate) : null
   );
   const [pickEnd, setPickEnd] = useState<Date | null>(
-    endDate ? new Date(endDate) : null,
+    endDate ? new Date(endDate) : null
   );
   const [pickingStart, setPickingStart] = useState(true);
 
@@ -248,7 +246,7 @@ const DateRangeFilter = ({
         setPickingStart(true);
       }
     },
-    [pickingStart, pickStart],
+    [pickingStart, pickStart]
   );
 
   const handleApply = () => {

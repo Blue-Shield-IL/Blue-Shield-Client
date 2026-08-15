@@ -1,7 +1,4 @@
-export const SENTIMENT_COLORS: Record<
-  string,
-  { bg: string; text: string }
-> = {
+export const SENTIMENT_COLORS: Record<string, { bg: string; text: string }> = {
   Supportive: { bg: "#DCFCE7", text: "#16A34A" },
   Neutral: { bg: "#F1F5F9", text: "#64748B" },
   Negative: { bg: "#FEF3C7", text: "#D97706" },

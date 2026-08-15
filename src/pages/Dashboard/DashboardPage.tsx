@@ -1,22 +1,22 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Box, ToggleButton, ToggleButtonGroup } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
 import AppShell from "components/AppShell";
 import useAuth from "contexts/authContext";
-import { DateRangeProvider } from "contexts/dateRangeContext";
-import useDateRange from "contexts/dateRangeContext/useDateRange";
-import { getMyKeywords } from "services/keywordsService";
-import ReachSummary from "./widgets/ReachSummary";
-import TrendCharts from "./widgets/TrendCharts";
 import HotspotMap from "./widgets/HotspotMap";
-import TopSources from "./widgets/TopSources";
 import MostViewed from "./widgets/MostViewed";
+import TopSources from "./widgets/TopSources";
 import RangeFilter from "./widgets/RangeFilter";
-import SentimentWidget from "./widgets/SentimentWidget";
-import TopKeywordsWidget from "./widgets/TopKeywordsWidget";
-import IhraCategoryWidget from "./widgets/IhraCategoryWidget";
+import TrendCharts from "./widgets/TrendCharts";
+import { useQuery } from "@tanstack/react-query";
+import ReachSummary from "./widgets/ReachSummary";
 import MyTopicsWidget from "./widgets/MyTopicsWidget";
+import SentimentWidget from "./widgets/SentimentWidget";
+import { getMyKeywords } from "services/keywordsService";
 import { getPanelOrder, type PanelId } from "./panelConfig";
+import TopKeywordsWidget from "./widgets/TopKeywordsWidget";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { DateRangeProvider } from "contexts/dateRangeContext";
+import IhraCategoryWidget from "./widgets/IhraCategoryWidget";
+import useDateRange from "contexts/dateRangeContext/useDateRange";
+import { Box, ToggleButton, ToggleButtonGroup } from "@mui/material";
 
 const threeColGrid = {
   display: "grid",
@@ -61,8 +61,8 @@ const DashboardContent = () => {
   const panelOrder = getPanelOrder(role ?? undefined);
 
   const userKeywordsCsv = useMemo(
-    () => (myKeywords ?? []).map((k) => k.word).join(","),
-    [myKeywords],
+    () => (myKeywords ?? []).map(k => k.word).join(","),
+    [myKeywords]
   );
 
   const handleViewModeChange = (_: unknown, val: "all" | "myTopics" | null) => {
@@ -116,7 +116,7 @@ const DashboardContent = () => {
       subtitle="Real-time monitoring of antisemitic content collected across sources."
       topbarContent={topbarContent}
     >
-      {panelOrder.map((id) => panelComponents[id])}
+      {panelOrder.map(id => panelComponents[id])}
     </AppShell>
   );
 };

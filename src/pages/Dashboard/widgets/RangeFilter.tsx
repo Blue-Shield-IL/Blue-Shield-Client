@@ -1,5 +1,5 @@
-import useDateRange from "contexts/dateRangeContext/useDateRange";
 import DateRangePicker from "components/DateRangePicker";
+import useDateRange from "contexts/dateRangeContext/useDateRange";
 
 const RangeFilter = () => {
   const { preset, setPreset, setCustomRange, startDate, endDate } =

@@ -19,7 +19,7 @@ const ChipInput = ({ placeholder, values, onChange }: ChipInputProps) => {
   };
 
   const removeChip = (chip: string) => {
-    onChange(values.filter((c) => c !== chip));
+    onChange(values.filter(c => c !== chip));
   };
 
   const handleKey = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -53,7 +53,7 @@ const ChipInput = ({ placeholder, values, onChange }: ChipInputProps) => {
         },
       }}
     >
-      {values.map((chip) => (
+      {values.map(chip => (
         <Box
           key={chip}
           sx={{
@@ -87,7 +87,7 @@ const ChipInput = ({ placeholder, values, onChange }: ChipInputProps) => {
       ))}
       <InputBase
         value={draft}
-        onChange={(e) => setDraft(e.target.value)}
+        onChange={e => setDraft(e.target.value)}
         onKeyDown={handleKey}
         onBlur={addChip}
         placeholder={values.length ? "" : placeholder}

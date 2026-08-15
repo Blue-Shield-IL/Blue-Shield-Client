@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { AxiosError } from "axios";
-import { useForm } from "react-hook-form";
 import { ROUTES } from "constants/routes";
-import styles from "./RegisterPage.style";
 import useAuth from "contexts/authContext";
 import type { ApiError } from "interfaces/auth";
 import { GoogleLogin } from "@react-oauth/google";
+import { useForm, useWatch } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
+import useRegisterStyles from "./RegisterPage.style";
 import { Logo, EyeOpen, EyeClosed } from "components/Svg";
 import { PASSWORD_VALIDATION_RULES } from "constants/validation";
 import PasswordStrengthIndicator from "components/PasswordValidator";
@@ -28,21 +28,22 @@ interface RegisterFormValues {
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const { styles, isDark } = useRegisterStyles();
   const { register: authRegister, googleAuth } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<string[]>([]);
 
   const {
+    control,
     register,
     handleSubmit,
-    watch,
     formState: { isSubmitting, errors },
   } = useForm<RegisterFormValues>({
     defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
   });
 
-  const password = watch("password");
+  const password = useWatch({ control, name: "password" });
 
   const onSubmit = async (data: RegisterFormValues) => {
     setError("");
@@ -254,7 +255,7 @@ const RegisterPage = () => {
                 onSuccess={handleGoogleSuccess}
                 onError={() => setError("Google sign-up failed.")}
                 text="signup_with"
-                theme="outline"
+                theme={isDark ? "filled_black" : "outline"}
                 size="large"
                 width="400"
                 shape="rectangular"

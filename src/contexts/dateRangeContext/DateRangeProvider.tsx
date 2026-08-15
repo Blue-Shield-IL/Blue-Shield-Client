@@ -1,10 +1,10 @@
-import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
-import { DateRangeContext, type RangePreset } from "./useDateRange";
 import { useDateBounds } from "hooks/useDashboardData";
+import { DateRangeContext, type RangePreset } from "./useDateRange";
+import { type ReactNode, useCallback, useMemo, useState } from "react";
 
 const getPresetDates = (
   preset: RangePreset,
-  earliest?: string,
+  earliest?: string
 ): { startDate: string; endDate: string } => {
   const end = new Date();
   end.setHours(23, 59, 59, 999);
@@ -42,11 +42,11 @@ export const DateRangeProvider = ({ children }: { children: ReactNode }) => {
   });
   const [keywords, setKeywords] = useState("");
 
-  useEffect(() => {
-    if (bounds?.earliest && preset === "All Time") {
-      setDates(getPresetDates("All Time", bounds.earliest));
-    }
-  }, [bounds?.earliest, preset]);
+  // Derive effective dates: override with bounds for "All Time" preset
+  const effectiveDates =
+    preset === "All Time" && bounds?.earliest
+      ? getPresetDates("All Time", bounds.earliest)
+      : dates;
 
   const setPreset = useCallback(
     (newPreset: RangePreset) => {
@@ -55,7 +55,7 @@ export const DateRangeProvider = ({ children }: { children: ReactNode }) => {
         setDates(getPresetDates(newPreset, bounds?.earliest));
       }
     },
-    [bounds?.earliest],
+    [bounds?.earliest]
   );
 
   const setCustomRange = useCallback((start: string, end: string) => {
@@ -66,14 +66,21 @@ export const DateRangeProvider = ({ children }: { children: ReactNode }) => {
   const value = useMemo(
     () => ({
       preset,
-      startDate: dates.startDate,
-      endDate: dates.endDate,
+      startDate: effectiveDates.startDate,
+      endDate: effectiveDates.endDate,
       keywords,
       setPreset,
       setCustomRange,
       setKeywords,
     }),
-    [preset, dates, keywords, setPreset, setCustomRange],
+    [
+      preset,
+      effectiveDates.startDate,
+      effectiveDates.endDate,
+      keywords,
+      setPreset,
+      setCustomRange,
+    ]
   );
 
   return (

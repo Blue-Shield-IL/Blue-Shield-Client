@@ -1,12 +1,13 @@
 import { useMemo } from "react";
-import styles from "./PasswordValidator.style";
 import { Box, Typography } from "@mui/material";
+import usePasswordValidatorStyles from "./PasswordValidator.style";
 import {
   PASSWORD_RULES,
   passwordStrengthIndicator,
 } from "./PasswordValidator.utils";
 
 const PasswordValidator = ({ password }: { password: string }) => {
+  const styles = usePasswordValidatorStyles();
   const results = useMemo(
     () =>
       PASSWORD_RULES.map(rule => ({ ...rule, passed: rule.test(password) })),

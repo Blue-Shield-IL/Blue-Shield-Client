@@ -1,9 +1,30 @@
 import axios, { HttpStatusCode } from "axios";
 
 let accessToken: string | null = null;
+let refreshPromise: Promise<string> | null = null;
 
 export const setAccessToken = (token: string | null) => {
   accessToken = token;
+};
+
+const refreshAccessToken = (): Promise<string> => {
+  if (!refreshPromise) {
+    refreshPromise = axios
+      .post(
+        `${import.meta.env.VITE_API_BASE_URL}/auth/refresh`,
+        {},
+        { withCredentials: true }
+      )
+      .then(({ data }) => {
+        accessToken = data.accessToken;
+        return data.accessToken as string;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+
+  return refreshPromise;
 };
 
 export const createApiInstance = (basePath: string, addToken = true) => {
@@ -33,13 +54,8 @@ export const createApiInstance = (basePath: string, addToken = true) => {
           originalRequest._retry = true;
 
           try {
-            const { data } = await axios.post(
-              `${import.meta.env.VITE_API_BASE_URL}/auth/refresh`,
-              {},
-              { withCredentials: true }
-            );
-            accessToken = data.accessToken;
-            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+            const newToken = await refreshAccessToken();
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
 
             return instance(originalRequest);
           } catch {

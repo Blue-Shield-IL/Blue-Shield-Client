@@ -1,10 +1,18 @@
+import useCardStyles from "hooks/useCardStyles";
+import { formatNumber } from "../dashboardHelpers";
 import { Box, Skeleton, Typography } from "@mui/material";
 import { useDashboardStats } from "hooks/useDashboardData";
-import useCardStyles from "hooks/useCardStyles";
 import useDateRange from "contexts/dateRangeContext/useDateRange";
-import { formatNumber } from "../dashboardHelpers";
 
-const MiniStat = ({ value, label, styles }: { value: string; label: string; styles: ReturnType<typeof useCardStyles> }) => (
+const MiniStat = ({
+  value,
+  label,
+  styles,
+}: {
+  value: string;
+  label: string;
+  styles: ReturnType<typeof useCardStyles>;
+}) => (
   <Box
     sx={{
       display: "flex",
@@ -35,17 +43,25 @@ const MiniStat = ({ value, label, styles }: { value: string; label: string; styl
       •
     </Box>
     <Box sx={{ lineHeight: 1.2 }}>
-      <Typography sx={{ fontSize: "18px", fontWeight: 600, color: styles.text.primary }}>
+      <Typography
+        sx={{ fontSize: "18px", fontWeight: 600, color: styles.text.primary }}
+      >
         {value}
       </Typography>
-      <Typography sx={{ fontSize: "12px", color: styles.text.secondary }}>{label}</Typography>
+      <Typography sx={{ fontSize: "12px", color: styles.text.secondary }}>
+        {label}
+      </Typography>
     </Box>
   </Box>
 );
 
 const ReachSummary = () => {
   const { startDate, endDate, preset, keywords } = useDateRange();
-  const { data, isLoading } = useDashboardStats({ startDate, endDate, keywords });
+  const { data, isLoading } = useDashboardStats({
+    startDate,
+    endDate,
+    keywords,
+  });
   const styles = useCardStyles();
 
   return (
@@ -96,7 +112,9 @@ const ReachSummary = () => {
           >
             Total Reach
           </Typography>
-          <Box sx={{ display: "flex", alignItems: "baseline", gap: 1.5, mt: 1 }}>
+          <Box
+            sx={{ display: "flex", alignItems: "baseline", gap: 1.5, mt: 1 }}
+          >
             {isLoading ? (
               <Skeleton width={180} height={64} />
             ) : (
@@ -111,14 +129,18 @@ const ReachSummary = () => {
                 >
                   {formatNumber(data?.totalViews ?? 0)}
                 </Typography>
-                <Typography sx={{ fontSize: "18px", color: styles.text.secondary }}>
+                <Typography
+                  sx={{ fontSize: "18px", color: styles.text.secondary }}
+                >
                   Views
                 </Typography>
               </>
             )}
           </Box>
           {!isLoading && preset !== "All Time" && (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1.5 }}>
+            <Box
+              sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1.5 }}
+            >
               <Box
                 sx={{
                   display: "inline-flex",
@@ -149,7 +171,11 @@ const ReachSummary = () => {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(4, 1fr)" },
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, 1fr)",
+              md: "repeat(4, 1fr)",
+            },
             gap: 1.5,
           }}
         >

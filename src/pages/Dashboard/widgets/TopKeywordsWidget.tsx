@@ -1,15 +1,20 @@
 import { Box, Skeleton, Tooltip, Typography } from "@mui/material";
 
-import { useTopKeywords } from "hooks/useDashboardData";
 import useCardStyles from "hooks/useCardStyles";
+import { useTopKeywords } from "hooks/useDashboardData";
 import useDateRange from "contexts/dateRangeContext/useDateRange";
 
 const TopKeywordsWidget = () => {
   const { startDate, endDate, keywords } = useDateRange();
-  const { data, isLoading } = useTopKeywords({ startDate, endDate, keywords, limit: 10 });
+  const { data, isLoading } = useTopKeywords({
+    startDate,
+    endDate,
+    keywords,
+    limit: 10,
+  });
   const styles = useCardStyles();
 
-  const maxCount = Math.max(...(data ?? []).map((d) => d.count), 1);
+  const maxCount = Math.max(...(data ?? []).map(d => d.count), 1);
 
   return (
     <Box
@@ -49,17 +54,29 @@ const TopKeywordsWidget = () => {
           "&::-webkit-scrollbar": { width: 6 },
           "&::-webkit-scrollbar-track": { background: "transparent" },
           "&::-webkit-scrollbar-thumb": {
-            background: styles.isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)",
+            background: styles.isDark
+              ? "rgba(255,255,255,0.15)"
+              : "rgba(0,0,0,0.12)",
             borderRadius: 3,
           },
         }}
       >
         {isLoading
           ? Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} variant="rectangular" height={28} sx={{ borderRadius: 1 }} />
+              <Skeleton
+                key={i}
+                variant="rectangular"
+                height={28}
+                sx={{ borderRadius: 1 }}
+              />
             ))
-          : (data ?? []).map((item) => (
-              <Tooltip key={item.keyword} title={item.keyword} arrow placement="top-start">
+          : (data ?? []).map(item => (
+              <Tooltip
+                key={item.keyword}
+                title={item.keyword}
+                arrow
+                placement="top-start"
+              >
                 <Box>
                   <Box
                     sx={{
